@@ -38,6 +38,7 @@ namespace FluentRegeditApp
         private readonly JsonCsvExporter _jsonCsv;
         private readonly DiffPreviewService _diff;
         private readonly HiveSaveLoadService _hive = new();
+        private Microsoft.UI.Windowing.AppWindow? _appWindow;
 
         private AppSettings _settings;
         private readonly bool _isElevated;
@@ -65,6 +66,7 @@ namespace FluentRegeditApp
 
             _isElevated = DetectElevation();
             ApplySettings(initial: true);
+            InitializeCustomTitleBar();
             UpdateStatus(null);
             UpdateUndoState();
 
@@ -84,6 +86,37 @@ namespace FluentRegeditApp
                 return p.IsInRole(WindowsBuiltInRole.Administrator);
             }
             catch { return false; }
+        }
+
+        private void InitializeCustomTitleBar()
+        {
+            ExtendsContentIntoTitleBar = true;
+            SetTitleBar(AppTitleBar);
+
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
+            _appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
+            _appWindow.Changed += (_, _) => DispatcherQueue.TryEnqueue(UpdateTitleBarInsets);
+
+            if (Microsoft.UI.Windowing.AppWindowTitleBar.IsCustomizationSupported())
+            {
+                _appWindow.TitleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
+                _appWindow.TitleBar.ButtonInactiveBackgroundColor = Microsoft.UI.Colors.Transparent;
+                _appWindow.TitleBar.IconShowOptions = Microsoft.UI.Windowing.IconShowOptions.HideIconAndSystemMenu;
+            }
+
+            UpdateTitleBarInsets();
+        }
+
+        private void UpdateTitleBarInsets()
+        {
+            if (_appWindow is null || _appWindow.TitleBar is null)
+            {
+                return;
+            }
+
+            TitleBarLeftInsetColumn.Width = new GridLength(Math.Max(0, _appWindow.TitleBar.LeftInset));
+            TitleBarRightInsetColumn.Width = new GridLength(Math.Max(0, _appWindow.TitleBar.RightInset));
         }
 
         private void ApplySettings(bool initial)

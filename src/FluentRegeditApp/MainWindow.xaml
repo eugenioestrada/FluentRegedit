@@ -39,95 +39,138 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Menu -->
-        <MenuBar Grid.Row="0">
-            <MenuBarItem Title="File">
-                <MenuFlyoutItem Text="Import .reg…" Click="OnImportClick">
-                    <MenuFlyoutItem.Icon>
-                        <FontIcon Glyph="&#xE8E5;" FontFamily="Segoe Fluent Icons" />
-                    </MenuFlyoutItem.Icon>
-                </MenuFlyoutItem>
-                <MenuFlyoutSubItem Text="Export current key">
-                    <MenuFlyoutItem Text="As .reg (Unicode v5)…" Click="OnExportClick">
-                        <MenuFlyoutItem.Icon>
-                            <FontIcon Glyph="&#xEDE1;" FontFamily="Segoe Fluent Icons" />
-                        </MenuFlyoutItem.Icon>
-                    </MenuFlyoutItem>
-                    <MenuFlyoutItem Text="As .json…" Click="OnExportJsonClick" />
-                    <MenuFlyoutItem Text="As .csv…" Click="OnExportCsvClick" />
-                </MenuFlyoutSubItem>
-                <MenuFlyoutSeparator />
-                <MenuFlyoutItem Text="Backup current key" Click="OnBackupClick">
-                    <MenuFlyoutItem.Icon>
-                        <FontIcon Glyph="&#xE7B8;" FontFamily="Segoe Fluent Icons" />
-                    </MenuFlyoutItem.Icon>
-                </MenuFlyoutItem>
-                <MenuFlyoutItem Text="Manage backups…" Click="OnManageBackupsClick" />
-                <MenuFlyoutItem Text="Open backups folder" Click="OnOpenBackupsClick" />
-                <MenuFlyoutSeparator />
-                <MenuFlyoutSubItem x:Name="HiveMenu" Text="Hive (admin only)">
-                    <MenuFlyoutItem Text="Save hive…" Click="OnSaveHiveClick" />
-                    <MenuFlyoutItem Text="Load hive…" Click="OnLoadHiveClick" />
-                    <MenuFlyoutItem Text="Unload selected hive" Click="OnUnloadHiveClick" />
-                </MenuFlyoutSubItem>
-                <MenuFlyoutSeparator />
-                <MenuFlyoutItem Text="Exit" Click="OnExitClick" />
-            </MenuBarItem>
-            <MenuBarItem Title="Edit">
-                <MenuFlyoutItem Text="Undo" Click="OnUndoClick" x:Name="UndoMenuItem" IsEnabled="False">
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="Z" Modifiers="Control" IsEnabled="False" />
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                    <MenuFlyoutItem.Icon>
-                        <FontIcon Glyph="&#xE7A7;" FontFamily="Segoe Fluent Icons" />
-                    </MenuFlyoutItem.Icon>
-                </MenuFlyoutItem>
-                <MenuFlyoutSeparator />
-                <MenuFlyoutItem Text="Find…" Click="OnSearchClick">
-                    <MenuFlyoutItem.Icon>
-                        <FontIcon Glyph="&#xE721;" FontFamily="Segoe Fluent Icons" />
-                    </MenuFlyoutItem.Icon>
-                </MenuFlyoutItem>
-                <MenuFlyoutItem Text="Find next" Click="OnFindNextClick" />
-                <MenuFlyoutSeparator />
-                <MenuFlyoutItem Text="Rename" Click="OnRenameClick" />
-                <MenuFlyoutItem Text="Copy key path" Click="OnCopyPathClick">
-                    <MenuFlyoutItem.Icon>
-                        <FontIcon Glyph="&#xE8C8;" FontFamily="Segoe Fluent Icons" />
-                    </MenuFlyoutItem.Icon>
-                </MenuFlyoutItem>
-                <MenuFlyoutSeparator />
-                <MenuFlyoutSubItem x:Name="RecentMenu" Text="Recent locations" />
-            </MenuBarItem>
-            <MenuBarItem x:Name="FavoritesMenuBar" Title="Favorites">
-                <MenuFlyoutItem Text="Add current key…" Click="OnAddFavoriteClick">
-                    <MenuFlyoutItem.Icon>
-                        <FontIcon Glyph="&#xE734;" FontFamily="Segoe Fluent Icons" />
-                    </MenuFlyoutItem.Icon>
-                </MenuFlyoutItem>
-                <MenuFlyoutItem Text="Manage favorites…" Click="OnManageFavoritesClick" />
-                <MenuFlyoutSeparator x:Name="FavoritesSeparator" />
-                <!-- Dynamic favorite items appended at runtime -->
-            </MenuBarItem>
-            <MenuBarItem Title="View">
-                <ToggleMenuFlyoutItem x:Name="ViewDefaultItem" Text="Default view" Click="OnViewModeClick" Tag="Default" />
-                <ToggleMenuFlyoutItem x:Name="View32Item" Text="32-bit view" Click="OnViewModeClick" Tag="Registry32" />
-                <ToggleMenuFlyoutItem x:Name="View64Item" Text="64-bit view" Click="OnViewModeClick" Tag="Registry64" />
-            </MenuBarItem>
-            <MenuBarItem Title="Tools">
-                <MenuFlyoutItem Text="Command palette…" Click="OnPaletteClick">
-                    <MenuFlyoutItem.Icon>
-                        <FontIcon Glyph="&#xE756;" FontFamily="Segoe Fluent Icons" />
-                    </MenuFlyoutItem.Icon>
-                </MenuFlyoutItem>
-                <MenuFlyoutSeparator />
-                <MenuFlyoutItem Text="Settings…" Click="OnSettingsClick">
-                    <MenuFlyoutItem.Icon>
-                        <FontIcon Glyph="&#xE713;" FontFamily="Segoe Fluent Icons" />
-                    </MenuFlyoutItem.Icon>
-                </MenuFlyoutItem>
-            </MenuBarItem>
-        </MenuBar>
+        <!-- Top chrome -->
+        <Border Grid.Row="0"
+                BorderThickness="0,0,0,1"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid x:Name="AppTitleBar"
+                      Grid.Row="0"
+                      Background="{ThemeResource LayerOnAcrylicFillColorDefaultBrush}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition x:Name="TitleBarLeftInsetColumn" Width="0" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition x:Name="TitleBarRightInsetColumn" Width="0" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="1"
+                          ColumnSpacing="8"
+                          Padding="12,0"
+                          Background="Transparent">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   Opacity="0.88"
+                                   Text="FluentRegedit" />
+                    </Grid>
+                </Grid>
+
+                <Border Grid.Row="1"
+                        Background="{ThemeResource LayerOnAcrylicFillColorDefaultBrush}">
+                    <MenuBar Background="Transparent"
+                             Margin="4,0,0,2">
+                        <MenuBarItem Title="File">
+                            <MenuFlyoutItem Text="Import .reg…" Click="OnImportClick">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE8E5;" FontFamily="Segoe Fluent Icons" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutSubItem Text="Export current key">
+                                <MenuFlyoutItem Text="As .reg (Unicode v5)…" Click="OnExportClick">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xEDE1;" FontFamily="Segoe Fluent Icons" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="As .json…" Click="OnExportJsonClick" />
+                                <MenuFlyoutItem Text="As .csv…" Click="OnExportCsvClick" />
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSeparator />
+                            <MenuFlyoutItem Text="Backup current key" Click="OnBackupClick">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE7B8;" FontFamily="Segoe Fluent Icons" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Manage backups…" Click="OnManageBackupsClick" />
+                            <MenuFlyoutItem Text="Open backups folder" Click="OnOpenBackupsClick" />
+                            <MenuFlyoutSeparator />
+                            <MenuFlyoutSubItem x:Name="HiveMenu" Text="Hive (admin only)">
+                                <MenuFlyoutItem Text="Save hive…" Click="OnSaveHiveClick" />
+                                <MenuFlyoutItem Text="Load hive…" Click="OnLoadHiveClick" />
+                                <MenuFlyoutItem Text="Unload selected hive" Click="OnUnloadHiveClick" />
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSeparator />
+                            <MenuFlyoutItem Text="Exit" Click="OnExitClick" />
+                        </MenuBarItem>
+                        <MenuBarItem Title="Edit">
+                            <MenuFlyoutItem Text="Undo" Click="OnUndoClick" x:Name="UndoMenuItem" IsEnabled="False">
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="Z" Modifiers="Control" IsEnabled="False" />
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE7A7;" FontFamily="Segoe Fluent Icons" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutSeparator />
+                            <MenuFlyoutItem Text="Find…" Click="OnSearchClick">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE721;" FontFamily="Segoe Fluent Icons" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Find next" Click="OnFindNextClick" />
+                            <MenuFlyoutSeparator />
+                            <MenuFlyoutItem Text="Rename" Click="OnRenameClick" />
+                            <MenuFlyoutItem Text="Copy key path" Click="OnCopyPathClick">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE8C8;" FontFamily="Segoe Fluent Icons" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutSeparator />
+                            <MenuFlyoutSubItem x:Name="RecentMenu" Text="Recent locations" />
+                        </MenuBarItem>
+                        <MenuBarItem x:Name="FavoritesMenuBar" Title="Favorites">
+                            <MenuFlyoutItem Text="Add current key…" Click="OnAddFavoriteClick">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE734;" FontFamily="Segoe Fluent Icons" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Manage favorites…" Click="OnManageFavoritesClick" />
+                            <MenuFlyoutSeparator x:Name="FavoritesSeparator" />
+                            <!-- Dynamic favorite items appended at runtime -->
+                        </MenuBarItem>
+                        <MenuBarItem Title="View">
+                            <ToggleMenuFlyoutItem x:Name="ViewDefaultItem" Text="Default view" Click="OnViewModeClick" Tag="Default" />
+                            <ToggleMenuFlyoutItem x:Name="View32Item" Text="32-bit view" Click="OnViewModeClick" Tag="Registry32" />
+                            <ToggleMenuFlyoutItem x:Name="View64Item" Text="64-bit view" Click="OnViewModeClick" Tag="Registry64" />
+                        </MenuBarItem>
+                        <MenuBarItem Title="Tools">
+                            <MenuFlyoutItem Text="Command palette…" Click="OnPaletteClick">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE756;" FontFamily="Segoe Fluent Icons" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutSeparator />
+                            <MenuFlyoutItem Text="Settings…" Click="OnSettingsClick">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE713;" FontFamily="Segoe Fluent Icons" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                        </MenuBarItem>
+                    </MenuBar>
+                </Border>
+            </Grid>
+        </Border>
 
         <!-- Path bar -->
         <Grid Grid.Row="1" Padding="12,8" ColumnSpacing="6">

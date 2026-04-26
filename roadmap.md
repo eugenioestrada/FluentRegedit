@@ -113,7 +113,8 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## 9. Modern UX polish
 
-- [x] Mica backdrop & custom title bar.
+- [x] Mica backdrop.
+- [ ] Custom title bar (icon + integrated menu).
 - [x] Dark / light / system theme.
 - [ ] Compact / comfortable density toggle.
 - [ ] Localization scaffold (en, es).

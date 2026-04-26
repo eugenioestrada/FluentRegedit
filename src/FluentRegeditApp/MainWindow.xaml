@@ -37,31 +37,10 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Custom title bar (drag region) -->
-        <Border x:Name="AppTitleBar"
-                Grid.Row="0"
-                Height="36"
-                Background="Transparent">
-            <Grid ColumnSpacing="8" Padding="12,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Image Grid.Column="0" Width="18" Height="18" Source="ms-appx:///Assets/Square44x44Logo.png" />
-                <TextBlock x:Name="AppTitleText"
-                           Grid.Column="1"
-                           VerticalAlignment="Center"
-                           Margin="8,0,0,0"
-                           Text="FluentRegedit"
-                           Style="{StaticResource CaptionTextBlockStyle}" />
-            </Grid>
-        </Border>
-
         <!-- Menu -->
-        <MenuBar Grid.Row="1">
+        <MenuBar Grid.Row="0">
             <MenuBarItem Title="File">
                 <MenuFlyoutItem Text="Import .reg…" Click="OnImportClick">
                     <MenuFlyoutItem.Icon>
@@ -151,7 +130,7 @@
         </MenuBar>
 
         <!-- Path bar -->
-        <Grid Grid.Row="2" Padding="12,8" ColumnSpacing="6">
+        <Grid Grid.Row="1" Padding="12,8" ColumnSpacing="6">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -188,10 +167,10 @@
         </Grid>
 
         <!-- Toast -->
-        <InfoBar x:Name="Toast" Grid.Row="3" IsOpen="False" Margin="12,0,12,0" />
+        <InfoBar x:Name="Toast" Grid.Row="2" IsOpen="False" Margin="12,0,12,0" />
 
         <!-- Main area -->
-        <Grid Grid.Row="4" ColumnSpacing="0">
+        <Grid Grid.Row="3" ColumnSpacing="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="320" MinWidth="180" />
                 <ColumnDefinition Width="Auto" />
@@ -345,7 +324,7 @@
         </Grid>
 
         <!-- Status bar -->
-        <Border Grid.Row="5" BorderThickness="0,1,0,0"
+        <Border Grid.Row="4" BorderThickness="0,1,0,0"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 Padding="12,6">
             <Grid ColumnSpacing="12">

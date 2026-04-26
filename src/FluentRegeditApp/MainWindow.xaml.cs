@@ -54,10 +54,6 @@ namespace FluentRegeditApp
             InitializeComponent();
             Title = "FluentRegedit";
 
-            // Custom title bar — extend content into the title bar region and use AppTitleBar as drag region.
-            ExtendsContentIntoTitleBar = true;
-            SetTitleBar(AppTitleBar);
-
             _settings = _settingsService.Load();
             _recent = new RecentLocationsService(_settings.RecentLocationsLimit);
             _search = new RegistrySearchService(ViewModel.Registry);

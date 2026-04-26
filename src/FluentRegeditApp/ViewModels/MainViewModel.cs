@@ -14,6 +14,8 @@ namespace FluentRegeditApp.ViewModels;
 
 public sealed class MainViewModel : INotifyPropertyChanged
 {
+    private const int BatchSize = 200;
+
     public RegistryService Registry { get; } = new();
 
     public ObservableCollection<RegistryKeyNode> Roots { get; } = new();
@@ -118,11 +120,43 @@ public sealed class MainViewModel : INotifyPropertyChanged
             }
 
             node.Children.Clear();
-            foreach (var name in names)
+            try
             {
-                var child = node.CreateChild(name);
-                child.AddPlaceholder();
-                node.Children.Add(child);
+                int i = 0;
+                foreach (var name in names)
+                {
+                    var child = node.CreateChild(name);
+                    child.AddPlaceholder();
+                    node.Children.Add(child);
+                    i++;
+
+                    if (i % BatchSize == 0)
+                    {
+                        if (ct.IsCancellationRequested)
+                        {
+                            node.Children.Clear();
+                            node.AddPlaceholder();
+                            return -1;
+                        }
+                        try
+                        {
+                            await Task.Delay(1, ct).ConfigureAwait(true);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            node.Children.Clear();
+                            node.AddPlaceholder();
+                            return -1;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[EnsureChildrenLoadedAsync/batch] {node.FullPath}: {ex}");
+                node.Children.Clear();
+                node.AddPlaceholder();
+                throw;
             }
             node.ChildrenLoaded = true;
             return names.Count;

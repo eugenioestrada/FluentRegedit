@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "FluentRegeditApp (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "FluentRegeditApp (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

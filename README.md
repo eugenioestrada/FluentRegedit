@@ -1,6 +1,33 @@
 # FluentRegedit
 
+<!-- Update OWNER/FluentRegedit to the actual GitHub owner/repo once published. -->
+[![CI](https://github.com/OWNER/FluentRegedit/actions/workflows/build.yml/badge.svg)](https://github.com/OWNER/FluentRegedit/actions/workflows/build.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
 A modern, Fluent Design replacement for the Windows Registry Editor (`regedit.exe`), built with **WinUI 3** and the **Windows App SDK**.
+
+> 🚧 **Status:** Early preview — feature parity with `regedit.exe` is in progress, see the [roadmap](./roadmap.md).
+
+## Tech stack
+
+- **WinUI 3** + **Windows App SDK 1.8**
+- **.NET 8**
+- **MVVM** architecture
+- **xUnit v3** + **AwesomeAssertions** for tests
+
+## Table of contents
+
+- [Why a modern Regedit?](#why-a-modern-regedit)
+- [Goals](#goals)
+- [Non-goals](#non-goals)
+- [Screenshots](#screenshots)
+- [Requirements (development)](#requirements-development)
+- [Build](#build)
+- [Test](#test)
+- [Run](#run)
+- [Project layout](#project-layout)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Why a modern Regedit?
 
@@ -30,6 +57,10 @@ The Windows registry is still a critical surface for power users, IT pros and de
 - Replacing Group Policy tooling.
 - Mobile / non-Windows support.
 
+## Screenshots
+
+_Screenshots coming soon._
+
 ## Requirements (development)
 
 - **Windows 10 21H1 (build 19041)** or newer (Windows 11 recommended for Mica).
@@ -39,13 +70,25 @@ The Windows registry is still a critical surface for power users, IT pros and de
 
 ## Build
 
+WinUI 3 / Windows App SDK requires an explicit platform — `AnyCPU` is **not** supported. Use `x64` (recommended), `x86`, or `ARM64`:
+
 ```powershell
-dotnet build src
+dotnet build src -p:Platform=x64
 ```
 
-The solution lives in `src/FluentRegedit.slnx` and contains a single project, `FluentRegeditApp`.
+The solution lives in `src/FluentRegedit.slnx` and contains the `FluentRegeditApp` project plus the `FluentRegeditApp.Tests` test project.
 
 Supported platforms: `x86`, `x64`, `ARM64`.
+
+## Test
+
+Tests run on **xUnit v3** with **AwesomeAssertions**:
+
+```powershell
+dotnet test src
+```
+
+The test suite exercises registry services against a sandbox hive under `HKCU\Software\FluentRegedit\Tests`.
 
 ## Run
 
@@ -63,25 +106,24 @@ dotnet run --project src\FluentRegeditApp -c Debug
 
 ```
 src/
-└── FluentRegeditApp/
-    ├── App.xaml(.cs)          # Application entry point
-    ├── MainWindow.xaml(.cs)   # Shell window
-    ├── Assets/                # App icons & splash
-    └── ...
+├── FluentRegedit.slnx              # Solution
+├── FluentRegeditApp/               # Main WinUI 3 app
+│   ├── App.xaml(.cs)               # Application entry point
+│   ├── MainWindow.xaml(.cs)        # Shell window
+│   ├── Assets/                     # App icons & splash
+│   ├── Controls/                   # Reusable controls (path bar, value editors, …)
+│   ├── Models/                     # Registry tree / value DTOs
+│   ├── Properties/                 # Launch settings, etc.
+│   ├── Services/                   # Registry access, backup, import/export, search
+│   ├── ViewModels/                 # MVVM view-models
+│   └── Views/                      # XAML views and dialogs
+└── FluentRegeditApp.Tests/         # xUnit v3 + AwesomeAssertions test project
 ```
-
-Internal structure (added incrementally as features land):
-
-- `Models/`     — registry tree / value DTOs
-- `Services/`   — registry access, backup, import/export, search
-- `ViewModels/` — MVVM view-models
-- `Views/`      — XAML views and dialogs
-- `Controls/`   — reusable controls (path bar, value editors, …)
 
 ## Contributing
 
-The roadmap in [`roadmap.md`](./roadmap.md) is the source of truth for scope. Pick an unchecked item, open an issue, and send a PR.
+The roadmap in [`roadmap.md`](./roadmap.md) is the source of truth for scope. Pick an unchecked item, open an issue, and send a PR. See [CONTRIBUTING.md](./CONTRIBUTING.md) for build/test details and conventions, and [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) for community expectations.
 
 ## License
 
-TBD.
+Licensed under the [MIT License](./LICENSE).

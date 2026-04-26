@@ -1,0 +1,70 @@
+name: Bug report
+description: Report a bug, crash, or incorrect behavior in FluentRegedit.
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report!
+
+        ⚠️ **Security issues** should be reported privately — see [SECURITY.md](../../SECURITY.md), not here.
+
+        Please search existing issues before submitting.
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: A minimal, numbered list of steps. Include the exact registry path(s) involved if relevant.
+      placeholder: |
+        1. Launch FluentRegedit
+        2. Navigate to HKCU\Software\...
+        3. Right-click the value 'Foo' and choose 'Edit'
+        4. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include any error messages, stack traces, or screenshots.
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS / Windows build
+      description: e.g. "Windows 11 23H2 (build 22631.4317)" — run `winver` to check.
+      placeholder: Windows 11 23H2 (build 22631.4317)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: FluentRegedit version
+      description: Version number, commit SHA, or "built from main on YYYY-MM-DD".
+    validations:
+      required: true
+  - type: dropdown
+    id: elevated
+    attributes:
+      label: Was the app running as Administrator?
+      options:
+        - "No"
+        - "Yes"
+        - "Not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Anything else that might help — third-party security software, custom Windows policies, related `.reg` files, etc.
+    validations:
+      required: false

@@ -24,6 +24,15 @@ public sealed class RegistryValueItem
         _ => $"REG_{Kind}".ToUpperInvariant(),
     };
 
+    /// <summary>True for value kinds the editor cannot safely round-trip (read-only display).</summary>
+    public bool IsReadOnly => Kind switch
+    {
+        RegistryValueKind.String or RegistryValueKind.ExpandString or RegistryValueKind.MultiString
+            or RegistryValueKind.DWord or RegistryValueKind.QWord
+            or RegistryValueKind.Binary or RegistryValueKind.None => false,
+        _ => true,
+    };
+
     public string DataDisplay
     {
         get
@@ -39,7 +48,11 @@ public sealed class RegistryValueItem
                     RawData is byte[] b ? FormatBytes(b) : RawData.ToString() ?? string.Empty,
                 RegistryValueKind.MultiString =>
                     RawData is string[] s ? string.Join(" \u2502 ", s) : RawData.ToString() ?? string.Empty,
-                _ => RawData.ToString() ?? string.Empty,
+                // REG_LINK / REG_RESOURCE_LIST / REG_FULL_RESOURCE_DESCRIPTOR /
+                // REG_RESOURCE_REQUIREMENTS_LIST: payload is a byte[] when read via Win32.
+                _ => RawData is byte[] bb ? FormatBytes(bb)
+                    : RawData is string str ? str
+                    : RawData.ToString() ?? string.Empty,
             };
         }
     }

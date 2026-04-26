@@ -18,6 +18,12 @@ public sealed class RegistryKeyNode : INotifyPropertyChanged
     public bool ChildrenLoaded { get; set; }
 
     /// <summary>
+    /// Re-entry guard: true while an async EnsureChildrenLoaded is in flight for this node.
+    /// Not a bound property — used only to short-circuit duplicate expansion requests.
+    /// </summary>
+    public bool IsLoading { get; set; }
+
+    /// <summary>
     /// True when <see cref="Children"/> contains only the placeholder used to
     /// force the TreeView to render an expansion chevron before real children
     /// are fetched.
@@ -29,6 +35,13 @@ public sealed class RegistryKeyNode : INotifyPropertyChanged
     {
         if (Children.Count == 0)
             Children.Add(new RegistryKeyNode(Root, SubPath, "…") { IsPlaceholder = true });
+    }
+
+    /// <summary>Replaces children with a single "Loading…" placeholder for visual feedback.</summary>
+    public void ShowLoadingPlaceholder()
+    {
+        Children.Clear();
+        Children.Add(new RegistryKeyNode(Root, SubPath, "Loading…") { IsPlaceholder = true });
     }
 
     private bool _isExpanded;

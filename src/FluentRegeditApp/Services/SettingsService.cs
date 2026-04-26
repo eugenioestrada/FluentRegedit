@@ -14,6 +14,12 @@ public sealed class AppSettings
     public bool ConfirmDestructive { get; set; } = true;
     public int RecentLocationsLimit { get; set; } = 12;
     public bool RegexSearch { get; set; } = false;
+
+    /// <summary>
+    /// Optional override for the snapshot/backup directory. <c>null</c> means use the default
+    /// under <c>%LOCALAPPDATA%\FluentRegedit\Backups</c>.
+    /// </summary>
+    public string? SnapshotDirectory { get; set; }
 }
 
 public sealed class SettingsService

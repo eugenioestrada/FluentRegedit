@@ -25,5 +25,25 @@
 
         <ToggleSwitch x:Name="ConfirmDestructiveToggle" Header="Confirm destructive operations" />
         <ToggleSwitch x:Name="RegexSearchToggle" Header="Use regex in search" />
+
+        <StackPanel Spacing="4">
+            <TextBlock Text="Snapshot directory" />
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="SnapshotDirBox"
+                         Grid.Column="0"
+                         PlaceholderText="(default — %LOCALAPPDATA%\FluentRegedit\Backups)" />
+                <Button x:Name="BrowseSnapshotDirButton"
+                        Grid.Column="1"
+                        Content="Browse…"
+                        Click="OnBrowseSnapshotDir" />
+            </Grid>
+            <TextBlock Text="Leave empty to use the default location."
+                       Style="{StaticResource CaptionTextBlockStyle}"
+                       Opacity="0.7" />
+        </StackPanel>
     </StackPanel>
 </ContentDialog>

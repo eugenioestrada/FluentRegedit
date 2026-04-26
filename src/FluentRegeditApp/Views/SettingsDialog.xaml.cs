@@ -1,4 +1,7 @@
+using System;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml;
+using Windows.Storage.Pickers;
 using FluentRegeditApp.Services;
 
 namespace FluentRegeditApp.Views;
@@ -6,6 +9,7 @@ namespace FluentRegeditApp.Views;
 public sealed partial class SettingsDialog : ContentDialog
 {
     public AppSettings Result { get; private set; }
+    public IntPtr OwnerHwnd { get; set; }
 
     public SettingsDialog(AppSettings current)
     {
@@ -17,6 +21,7 @@ public sealed partial class SettingsDialog : ContentDialog
             ConfirmDestructive = current.ConfirmDestructive,
             RecentLocationsLimit = current.RecentLocationsLimit,
             RegexSearch = current.RegexSearch,
+            SnapshotDirectory = current.SnapshotDirectory,
         };
 
         ThemeCombo.SelectedIndex = (int)current.Theme;
@@ -28,6 +33,7 @@ public sealed partial class SettingsDialog : ContentDialog
         }
         ConfirmDestructiveToggle.IsOn = current.ConfirmDestructive;
         RegexSearchToggle.IsOn = current.RegexSearch;
+        SnapshotDirBox.Text = current.SnapshotDirectory ?? string.Empty;
 
         PrimaryButtonClick += (_, _) =>
         {
@@ -37,6 +43,18 @@ public sealed partial class SettingsDialog : ContentDialog
             else Result.View = RegView.Default;
             Result.ConfirmDestructive = ConfirmDestructiveToggle.IsOn;
             Result.RegexSearch = RegexSearchToggle.IsOn;
+            var dir = (SnapshotDirBox.Text ?? string.Empty).Trim();
+            Result.SnapshotDirectory = string.IsNullOrEmpty(dir) ? null : dir;
         };
+    }
+
+    private async void OnBrowseSnapshotDir(object sender, RoutedEventArgs e)
+    {
+        var picker = new FolderPicker();
+        picker.FileTypeFilter.Add("*");
+        if (OwnerHwnd != System.IntPtr.Zero)
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, OwnerHwnd);
+        var folder = await picker.PickSingleFolderAsync();
+        if (folder is not null) SnapshotDirBox.Text = folder.Path;
     }
 }

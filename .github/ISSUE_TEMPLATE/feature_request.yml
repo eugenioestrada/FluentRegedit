@@ -1,0 +1,45 @@
+name: Feature request
+description: Suggest a new feature or UX improvement for FluentRegedit.
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an idea! Please check the [roadmap](../../roadmap.md) first — your idea may already be planned.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One or two sentences describing the feature.
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation / use case
+      description: What problem does this solve? Who is the user, and what are they trying to accomplish?
+    validations:
+      required: true
+  - type: textarea
+    id: ux
+    attributes:
+      label: Proposed UX
+      description: How should this work from the user's perspective? Mockups, sketches, or step-by-step flows are very welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you've thought about and why they're worse.
+    validations:
+      required: false
+  - type: input
+    id: roadmap
+    attributes:
+      label: Related roadmap item
+      description: Link or section heading from `roadmap.md`, if applicable.
+      placeholder: e.g. "Section 2 — Multi-tab browsing"
+    validations:
+      required: false

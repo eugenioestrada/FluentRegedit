@@ -28,12 +28,12 @@ namespace FluentRegeditApp
         private readonly RegistrySearchService _search;
         private readonly RegFileExporter _exporter;
         private readonly RegFileImporter _importer = new();
-        private readonly BackupService _backup;
+        private BackupService _backup;
         private readonly RegistryEditService _edit = new();
         private readonly SettingsService _settingsService = new();
         private readonly FavoritesService _favorites = new();
         private readonly RecentLocationsService _recent;
-        private readonly SnapshotManager _snapshots;
+        private SnapshotManager _snapshots;
         private readonly UndoJournal _undo = new();
         private readonly JsonCsvExporter _jsonCsv;
         private readonly DiffPreviewService _diff;
@@ -54,11 +54,15 @@ namespace FluentRegeditApp
             InitializeComponent();
             Title = "FluentRegedit";
 
+            // Custom title bar — extend content into the title bar region and use AppTitleBar as drag region.
+            ExtendsContentIntoTitleBar = true;
+            SetTitleBar(AppTitleBar);
+
             _settings = _settingsService.Load();
             _recent = new RecentLocationsService(_settings.RecentLocationsLimit);
             _search = new RegistrySearchService(ViewModel.Registry);
             _exporter = new RegFileExporter(ViewModel.Registry);
-            _backup = new BackupService(_exporter);
+            _backup = new BackupService(_exporter, _settings.SnapshotDirectory);
             _snapshots = new SnapshotManager(_backup, _importer);
             _jsonCsv = new JsonCsvExporter(ViewModel.Registry);
             _diff = new DiffPreviewService(_importer, ViewModel.Registry);
@@ -140,27 +144,96 @@ namespace FluentRegeditApp
 
         // ---- Tree & navigation ----
 
-        private void OnTreeExpanding(TreeView sender, TreeViewExpandingEventArgs args)
+        private async void OnTreeExpanding(TreeView sender, TreeViewExpandingEventArgs args)
         {
             if (args.Item is RegistryKeyNode node && !node.IsPlaceholder)
-                ViewModel.EnsureChildrenLoaded(node);
+            {
+                try { await ViewModel.EnsureChildrenLoadedAsync(node); }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"OnTreeExpanding: {ex}");
+                    ShowToast("Failed to load subkeys", ex.Message, InfoBarSeverity.Warning);
+                }
+            }
         }
 
-        private void OnTreeItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
+        private async void OnTreeItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
         {
             if (args.InvokedItem is RegistryKeyNode node && !node.IsPlaceholder)
-                NavigateTo(node, recordHistory: true);
+                await NavigateToAsync(node, recordHistory: true);
         }
 
-        private void OnTreeSelectionChanged(TreeView sender, TreeViewSelectionChangedEventArgs args)
+        private async void OnTreeSelectionChanged(TreeView sender, TreeViewSelectionChangedEventArgs args)
         {
             if (sender.SelectedItem is RegistryKeyNode node && !node.IsPlaceholder)
-                NavigateTo(node, recordHistory: true);
+                await NavigateToAsync(node, recordHistory: true);
         }
 
-        private void NavigateTo(RegistryKeyNode node, bool recordHistory)
+        private void OnKeysTreeKeyDown(object sender, KeyRoutedEventArgs e)
         {
-            ViewModel.LoadValues(node);
+            if (KeysTree.SelectedItem is not RegistryKeyNode node) return;
+            // Don't act on root nodes or placeholders.
+            if (node.IsPlaceholder) return;
+            switch (e.Key)
+            {
+                case VirtualKey.Delete:
+                    if (!string.IsNullOrEmpty(node.SubPath))
+                    {
+                        OnDeleteKeyClick(sender, new RoutedEventArgs());
+                        e.Handled = true;
+                    }
+                    break;
+                case VirtualKey.Enter:
+                    node.IsExpanded = !node.IsExpanded;
+                    e.Handled = true;
+                    break;
+                case VirtualKey.F2:
+                    if (!string.IsNullOrEmpty(node.SubPath))
+                    {
+                        OnRenameKeyClick(sender, new RoutedEventArgs());
+                        e.Handled = true;
+                    }
+                    break;
+            }
+        }
+
+        private void OnValuesListKeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (ValuesList.SelectedItem is not RegistryValueItem) return;
+            switch (e.Key)
+            {
+                case VirtualKey.Delete:
+                    OnDeleteValueClick(sender, new RoutedEventArgs());
+                    e.Handled = true;
+                    break;
+                case VirtualKey.Enter:
+                    OnModifyValueClick(sender, new RoutedEventArgs());
+                    e.Handled = true;
+                    break;
+                case VirtualKey.F2:
+                    OnRenameValueClick(sender, new RoutedEventArgs());
+                    e.Handled = true;
+                    break;
+            }
+        }
+
+        private async Task NavigateToAsync(RegistryKeyNode node, bool recordHistory)
+        {
+            int count;
+            try
+            {
+                count = await ViewModel.LoadValuesAsync(node);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"NavigateToAsync: {ex}");
+                ShowToast("Failed to load values", ex.Message, InfoBarSeverity.Warning);
+                count = -1;
+            }
+
+            // Cancelled (a newer load is in flight) — don't update path/history.
+            if (count < 0) return;
+
             PathBox.Text = node.FullPath;
             UpdateStatus(node);
 
@@ -191,76 +264,77 @@ namespace FluentRegeditApp
                 : $"{n} of {total} values";
         }
 
-        private void OnBackClick(object sender, RoutedEventArgs e)
+        private async void OnBackClick(object sender, RoutedEventArgs e)
         {
             var n = _history.Back();
-            if (n is not null) NavigateFromHistory(n);
+            if (n is not null) await NavigateFromHistoryAsync(n);
         }
 
-        private void OnForwardClick(object sender, RoutedEventArgs e)
+        private async void OnForwardClick(object sender, RoutedEventArgs e)
         {
             var n = _history.Forward();
-            if (n is not null) NavigateFromHistory(n);
+            if (n is not null) await NavigateFromHistoryAsync(n);
         }
 
-        private void NavigateFromHistory(RegistryKeyNode node)
+        private async Task NavigateFromHistoryAsync(RegistryKeyNode node)
         {
             _navigatingFromHistory = true;
             try
             {
-                var resolved = ViewModel.Resolve(node.Root, node.SubPath) ?? node;
-                SelectInTree(resolved);
-                NavigateTo(resolved, recordHistory: false);
+                var resolved = await ViewModel.ResolveAsync(node.Root, node.SubPath) ?? node;
+                await SelectInTreeAsync(resolved);
+                await NavigateToAsync(resolved, recordHistory: false);
             }
             finally { _navigatingFromHistory = false; }
         }
 
-        private void OnUpClick(object sender, RoutedEventArgs e)
+        private async void OnUpClick(object sender, RoutedEventArgs e)
         {
             var current = _history.Current;
             if (current is null || current.IsRoot) return;
             var idx = current.SubPath.LastIndexOf('\\');
             var parentSub = idx < 0 ? string.Empty : current.SubPath[..idx];
-            var parent = ViewModel.Resolve(current.Root, parentSub);
+            var parent = await ViewModel.ResolveAsync(current.Root, parentSub);
             if (parent is not null)
             {
-                SelectInTree(parent);
-                NavigateTo(parent, recordHistory: true);
+                await SelectInTreeAsync(parent);
+                await NavigateToAsync(parent, recordHistory: true);
             }
         }
 
-        private void OnRefreshClick(object sender, RoutedEventArgs e)
+        private async void OnRefreshClick(object sender, RoutedEventArgs e)
         {
             var current = _history.Current;
             if (current is null) return;
             current.ChildrenLoaded = false;
             current.Children.Clear();
-            ViewModel.EnsureChildrenLoaded(current);
-            NavigateTo(current, recordHistory: false);
+            current.AddPlaceholder();
+            await ViewModel.EnsureChildrenLoadedAsync(current);
+            await NavigateToAsync(current, recordHistory: false);
         }
 
-        private void OnPathBoxKeyDown(object sender, KeyRoutedEventArgs e)
+        private async void OnPathBoxKeyDown(object sender, KeyRoutedEventArgs e)
         {
             if (e.Key != VirtualKey.Enter) return;
             e.Handled = true;
-            NavigateToPath(PathBox.Text);
+            await NavigateToPathAsync(PathBox.Text);
         }
 
-        private void NavigateToPath(string? input)
+        private async Task NavigateToPathAsync(string? input)
         {
             if (!PathParser.TryParse(input, out var root, out var sub))
             {
                 ShowToast("Invalid path", $"'{input}' is not a recognized registry path.", InfoBarSeverity.Warning);
                 return;
             }
-            var node = ViewModel.Resolve(root, sub);
+            var node = await ViewModel.ResolveAsync(root, sub);
             if (node is null)
             {
                 ShowToast("Path not found", PathParser.Combine(root, sub), InfoBarSeverity.Warning);
                 return;
             }
-            SelectInTree(node);
-            NavigateTo(node, recordHistory: true);
+            await SelectInTreeAsync(node);
+            await NavigateToAsync(node, recordHistory: true);
         }
 
         // ---- Search ----
@@ -271,9 +345,9 @@ namespace FluentRegeditApp
         { e.Handled = true; await ShowSearchAsync(); }
 
         private void OnFindNextAccelerator(KeyboardAccelerator s, KeyboardAcceleratorInvokedEventArgs e)
-        { e.Handled = true; FindNext(); }
+        { e.Handled = true; _ = FindNextAsync(); }
 
-        private void OnFindNextClick(object sender, RoutedEventArgs e) => FindNext();
+        private void OnFindNextClick(object sender, RoutedEventArgs e) => _ = FindNextAsync();
 
         private void OnRefreshAccelerator(KeyboardAccelerator s, KeyboardAcceleratorInvokedEventArgs e)
         { e.Handled = true; OnRefreshClick(s, new RoutedEventArgs()); }
@@ -323,10 +397,10 @@ namespace FluentRegeditApp
 
             // Set index to selected so that Find Next moves forward from there.
             _lastHitIndex = _lastHits.IndexOf(selected);
-            JumpToHit(selected);
+            await JumpToHitAsync(selected);
         }
 
-        private void FindNext()
+        private async Task FindNextAsync()
         {
             if (_lastHits.Count == 0)
             {
@@ -335,23 +409,23 @@ namespace FluentRegeditApp
             }
             _lastHitIndex = (_lastHitIndex + 1) % _lastHits.Count;
             var hit = _lastHits[_lastHitIndex];
-            JumpToHit(hit);
+            await JumpToHitAsync(hit);
             ShowToast("Find next", $"{_lastHitIndex + 1} of {_lastHits.Count}: {hit.Display}", InfoBarSeverity.Informational);
         }
 
-        private void JumpToHit(SearchHit hit)
+        private async Task JumpToHitAsync(SearchHit hit)
         {
-            var node = ViewModel.Resolve(hit.Root, hit.SubPath);
+            var node = await ViewModel.ResolveAsync(hit.Root, hit.SubPath);
             if (node is null) return;
-            SelectInTree(node);
-            NavigateTo(node, recordHistory: true);
+            await SelectInTreeAsync(node);
+            await NavigateToAsync(node, recordHistory: true);
         }
 
-        private void SelectInTree(RegistryKeyNode target)
+        private async Task SelectInTreeAsync(RegistryKeyNode target)
         {
             var rootNode = ViewModel.Roots.FirstOrDefault(r => r.Root == target.Root);
             if (rootNode is null) return;
-            ViewModel.EnsureChildrenLoaded(rootNode);
+            await ViewModel.EnsureChildrenLoadedAsync(rootNode);
             rootNode.IsExpanded = true;
 
             if (target.IsRoot)
@@ -363,7 +437,7 @@ namespace FluentRegeditApp
             var current = rootNode;
             foreach (var seg in target.SubPath.Split('\\', StringSplitOptions.RemoveEmptyEntries))
             {
-                ViewModel.EnsureChildrenLoaded(current);
+                await ViewModel.EnsureChildrenLoadedAsync(current);
                 var next = current.Children.FirstOrDefault(c =>
                     string.Equals(c.Name, seg, StringComparison.OrdinalIgnoreCase));
                 if (next is null) return;
@@ -473,8 +547,9 @@ namespace FluentRegeditApp
             {
                 cur.ChildrenLoaded = false;
                 cur.Children.Clear();
-                ViewModel.EnsureChildrenLoaded(cur);
-                NavigateTo(cur, recordHistory: false);
+                cur.AddPlaceholder();
+                await ViewModel.EnsureChildrenLoadedAsync(cur);
+                await NavigateToAsync(cur, recordHistory: false);
             }
 
             var summary =
@@ -511,9 +586,9 @@ namespace FluentRegeditApp
                 var cur = _history.Current;
                 if (cur is not null)
                 {
-                    cur.ChildrenLoaded = false; cur.Children.Clear();
-                    ViewModel.EnsureChildrenLoaded(cur);
-                    NavigateTo(cur, recordHistory: false);
+                    cur.ChildrenLoaded = false; cur.Children.Clear(); cur.AddPlaceholder();
+                    await ViewModel.EnsureChildrenLoadedAsync(cur);
+                    await NavigateToAsync(cur, recordHistory: false);
                 }
             }
         }
@@ -569,7 +644,7 @@ namespace FluentRegeditApp
                 await Task.Run(() => _hive.LoadHive(RegistryRoot.Users, nameInput.NewName, file.Path));
                 ShowToast("Hive loaded", $"Mounted as HKU\\{nameInput.NewName}", InfoBarSeverity.Success);
                 var hkuRoot = ViewModel.Roots.FirstOrDefault(r => r.Root == RegistryRoot.Users);
-                if (hkuRoot is not null) { hkuRoot.ChildrenLoaded = false; hkuRoot.Children.Clear(); ViewModel.EnsureChildrenLoaded(hkuRoot); }
+                if (hkuRoot is not null) { hkuRoot.ChildrenLoaded = false; hkuRoot.Children.Clear(); hkuRoot.AddPlaceholder(); await ViewModel.EnsureChildrenLoadedAsync(hkuRoot); }
             }
             catch (Exception ex) { await ShowMessageAsync("Load hive failed", ex.Message); }
         }
@@ -597,7 +672,7 @@ namespace FluentRegeditApp
                 await Task.Run(() => _hive.UnloadHive(RegistryRoot.Users, current.SubPath));
                 ShowToast("Hive unloaded", current.SubPath, InfoBarSeverity.Success);
                 var hkuRoot = ViewModel.Roots.FirstOrDefault(r => r.Root == RegistryRoot.Users);
-                if (hkuRoot is not null) { hkuRoot.ChildrenLoaded = false; hkuRoot.Children.Clear(); ViewModel.EnsureChildrenLoaded(hkuRoot); }
+                if (hkuRoot is not null) { hkuRoot.ChildrenLoaded = false; hkuRoot.Children.Clear(); hkuRoot.AddPlaceholder(); await ViewModel.EnsureChildrenLoadedAsync(hkuRoot); }
             }
             catch (Exception ex) { await ShowMessageAsync("Unload hive failed", ex.Message); }
         }
@@ -623,11 +698,22 @@ namespace FluentRegeditApp
 
         private async void OnSettingsClick(object sender, RoutedEventArgs e)
         {
-            var dlg = new SettingsDialog(_settings) { XamlRoot = Content.XamlRoot };
+            var dlg = new SettingsDialog(_settings)
+            {
+                XamlRoot = Content.XamlRoot,
+                OwnerHwnd = WinRT.Interop.WindowNative.GetWindowHandle(this),
+            };
             if (await dlg.ShowAsync() != ContentDialogResult.Primary) return;
             var oldView = _settings.View;
+            var oldSnapDir = _settings.SnapshotDirectory;
             _settings = dlg.Result;
             _settingsService.Save(_settings);
+            if (!string.Equals(oldSnapDir ?? string.Empty, _settings.SnapshotDirectory ?? string.Empty, StringComparison.OrdinalIgnoreCase))
+            {
+                // Recreate the backup pipeline so future snapshots land in the new directory.
+                _backup = new BackupService(_exporter, _settings.SnapshotDirectory);
+                _snapshots = new SnapshotManager(_backup, _importer);
+            }
             ApplySettings(initial: oldView == _settings.View);
         }
 
@@ -643,7 +729,7 @@ namespace FluentRegeditApp
         private IEnumerable<CommandPaletteDialog.PaletteCommand> BuildPaletteCommands()
         {
             yield return new("Find…", "Search the registry (Ctrl+F)", () => _ = ShowSearchAsync());
-            yield return new("Find next", "Jump to next search hit (F3)", FindNext);
+            yield return new("Find next", "Jump to next search hit (F3)", () => _ = FindNextAsync());
             yield return new("Refresh", "Reload current key (F5)", () => OnRefreshClick(this, new RoutedEventArgs()));
             yield return new("Up one level", "Go to parent key (Alt+Up)", () => OnUpClick(this, new RoutedEventArgs()));
             yield return new("Back", "Navigate back (Alt+Left)", () => OnBackClick(this, new RoutedEventArgs()));
@@ -688,12 +774,12 @@ namespace FluentRegeditApp
             {
                 var item = new MenuFlyoutItem { Text = fav.Name };
                 var captured = fav;
-                item.Click += (_, _) =>
+                item.Click += async (_, _) =>
                 {
-                    var node = ViewModel.Resolve(captured.Root, captured.SubPath);
+                    var node = await ViewModel.ResolveAsync(captured.Root, captured.SubPath);
                     if (node is null)
                     { ShowToast("Favorite", "Path no longer exists.", InfoBarSeverity.Warning); return; }
-                    SelectInTree(node); NavigateTo(node, recordHistory: true);
+                    await SelectInTreeAsync(node); await NavigateToAsync(node, recordHistory: true);
                 };
                 FavoritesMenuBar.Items.Add(item);
             }
@@ -718,11 +804,11 @@ namespace FluentRegeditApp
                 var label = string.IsNullOrEmpty(entry.SubPath) ? entry.Root.FullName() : $"{entry.Root.FullName()}\\{entry.SubPath}";
                 var item = new MenuFlyoutItem { Text = label };
                 var captured = entry;
-                item.Click += (_, _) =>
+                item.Click += async (_, _) =>
                 {
-                    var node = ViewModel.Resolve(captured.Root, captured.SubPath);
+                    var node = await ViewModel.ResolveAsync(captured.Root, captured.SubPath);
                     if (node is null) { ShowToast("Recent", "Path no longer exists.", InfoBarSeverity.Warning); return; }
-                    SelectInTree(node); NavigateTo(node, recordHistory: true);
+                    await SelectInTreeAsync(node); await NavigateToAsync(node, recordHistory: true);
                 };
                 RecentMenu.Items.Add(item);
             }
@@ -845,7 +931,8 @@ namespace FluentRegeditApp
                 UpdateUndoState();
                 current.ChildrenLoaded = false;
                 current.Children.Clear();
-                ViewModel.EnsureChildrenLoaded(current);
+                current.AddPlaceholder();
+                await ViewModel.EnsureChildrenLoadedAsync(current);
                 current.IsExpanded = true;
                 ShowToast("Created", $"{current.FullPath}\\{name}", InfoBarSeverity.Success);
             }
@@ -884,14 +971,15 @@ namespace FluentRegeditApp
 
                 var idx = current.SubPath.LastIndexOf('\\');
                 var parentSub = idx < 0 ? string.Empty : current.SubPath[..idx];
-                var parent = ViewModel.Resolve(current.Root, parentSub);
+                var parent = await ViewModel.ResolveAsync(current.Root, parentSub);
                 if (parent is not null)
                 {
                     parent.ChildrenLoaded = false;
                     parent.Children.Clear();
-                    ViewModel.EnsureChildrenLoaded(parent);
-                    SelectInTree(parent);
-                    NavigateTo(parent, recordHistory: true);
+                    parent.AddPlaceholder();
+                    await ViewModel.EnsureChildrenLoadedAsync(parent);
+                    await SelectInTreeAsync(parent);
+                    await NavigateToAsync(parent, recordHistory: true);
                 }
                 ShowToast("Deleted", current.FullPath, InfoBarSeverity.Success);
             }
@@ -924,14 +1012,14 @@ namespace FluentRegeditApp
                 // Refresh parent
                 var idx = current.SubPath.LastIndexOf('\\');
                 var parentSub = idx < 0 ? string.Empty : current.SubPath[..idx];
-                var parent = ViewModel.Resolve(current.Root, parentSub);
+                var parent = await ViewModel.ResolveAsync(current.Root, parentSub);
                 if (parent is not null)
                 {
-                    parent.ChildrenLoaded = false; parent.Children.Clear();
-                    ViewModel.EnsureChildrenLoaded(parent);
+                    parent.ChildrenLoaded = false; parent.Children.Clear(); parent.AddPlaceholder();
+                    await ViewModel.EnsureChildrenLoadedAsync(parent);
                     var newSub = string.IsNullOrEmpty(parentSub) ? dlg.NewName : $"{parentSub}\\{dlg.NewName}";
-                    var newNode = ViewModel.Resolve(current.Root, newSub);
-                    if (newNode is not null) { SelectInTree(newNode); NavigateTo(newNode, recordHistory: true); }
+                    var newNode = await ViewModel.ResolveAsync(current.Root, newSub);
+                    if (newNode is not null) { await SelectInTreeAsync(newNode); await NavigateToAsync(newNode, recordHistory: true); }
                 }
                 _history.Clear();
                 BackButton.IsEnabled = false; ForwardButton.IsEnabled = false;
@@ -960,7 +1048,7 @@ namespace FluentRegeditApp
                     _undo.Push(new RestoreValueOp(current.Root, current.SubPath, item.Name,
                         item.Kind, item.RawData, Existed: true));
                 UpdateUndoState();
-                ViewModel.LoadValues(current);
+                await ViewModel.LoadValuesAsync(current);
                 UpdateStatus(current);
                 ShowToast("Renamed value", $"{item.Name} → {dlg.NewName}", InfoBarSeverity.Success);
             }
@@ -989,7 +1077,7 @@ namespace FluentRegeditApp
                     ? new RestoreValueOp(current.Root, current.SubPath, dlg.ValueName, oldKind, oldData, Existed: true)
                     : new DeleteValueOp(current.Root, current.SubPath, dlg.ValueName));
                 UpdateUndoState();
-                ViewModel.LoadValues(current);
+                await ViewModel.LoadValuesAsync(current);
                 UpdateStatus(current);
             }
             catch (Exception ex) { await ShowMessageAsync("Create value failed", ex.Message); }
@@ -1000,6 +1088,14 @@ namespace FluentRegeditApp
             var current = _history.Current;
             var item = ValuesList.SelectedItem as RegistryValueItem;
             if (current is null || item is null) return;
+
+            if (item.IsReadOnly)
+            {
+                ShowToast("Read-only value",
+                    $"{item.KindDisplay} values are displayed in read-only mode and cannot be edited.",
+                    InfoBarSeverity.Informational);
+                return;
+            }
 
             var dlg = ValueEditorDialog.ForEdit(item);
             dlg.XamlRoot = Content.XamlRoot;
@@ -1013,7 +1109,7 @@ namespace FluentRegeditApp
                     ? new RestoreValueOp(current.Root, current.SubPath, dlg.ValueName, oldKind, oldData, Existed: true)
                     : new DeleteValueOp(current.Root, current.SubPath, dlg.ValueName));
                 UpdateUndoState();
-                ViewModel.LoadValues(current);
+                await ViewModel.LoadValuesAsync(current);
                 UpdateStatus(current);
             }
             catch (Exception ex) { await ShowMessageAsync("Modify failed", ex.Message); }
@@ -1049,7 +1145,7 @@ namespace FluentRegeditApp
                     _undo.Push(new RestoreValueOp(current.Root, current.SubPath, item.Name, oldKind, oldData, Existed: true));
                     UpdateUndoState();
                 }
-                ViewModel.LoadValues(current);
+                await ViewModel.LoadValuesAsync(current);
                 UpdateStatus(current);
             }
             catch (Exception ex) { await ShowMessageAsync("Delete value failed", ex.Message); }
@@ -1066,7 +1162,7 @@ namespace FluentRegeditApp
 
         // ---- Undo ----
 
-        private void OnUndoClick(object sender, RoutedEventArgs e)
+        private async void OnUndoClick(object sender, RoutedEventArgs e)
         {
             if (!_undo.CanUndo) return;
             try
@@ -1076,9 +1172,9 @@ namespace FluentRegeditApp
                 var cur = _history.Current;
                 if (cur is not null)
                 {
-                    cur.ChildrenLoaded = false; cur.Children.Clear();
-                    ViewModel.EnsureChildrenLoaded(cur);
-                    NavigateTo(cur, recordHistory: false);
+                    cur.ChildrenLoaded = false; cur.Children.Clear(); cur.AddPlaceholder();
+                    await ViewModel.EnsureChildrenLoadedAsync(cur);
+                    await NavigateToAsync(cur, recordHistory: false);
                 }
                 ShowToast("Undone", "Last change was reverted.", InfoBarSeverity.Success);
             }

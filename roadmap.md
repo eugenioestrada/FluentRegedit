@@ -1,8 +1,21 @@
 # FluentRegedit — Roadmap
 
-This roadmap tracks **feature parity with the built-in Windows Registry Editor** plus the **modern UX additions** that justify FluentRegedit's existence.
+This roadmap tracks **feature parity with the built-in Windows Registry Editor** plus the **modern UX additions** that justify FluentRegedit's existence. It is the source of truth for scope: pick an unchecked item, open an issue, and send a PR. See the [README](./README.md) for the project overview and [CONTRIBUTING.md](./CONTRIBUTING.md) for the contribution process.
 
 Legend: `[ ]` not started · `[~]` in progress · `[x]` done
+
+## Contents
+
+1. [Core navigation](#1-core-navigation)
+2. [Path bar & navigation UX *(modern)*](#2-path-bar--navigation-ux-modern)
+3. [Values](#3-values)
+4. [Editing](#4-editing)
+5. [Search *(parity + modern)*](#5-search-parity--modern)
+6. [Import / Export](#6-import--export)
+7. [Backup & safety *(modern)*](#7-backup--safety-modern)
+8. [Favorites & bookmarks](#8-favorites--bookmarks)
+9. [Modern UX polish](#9-modern-ux-polish)
+10. [Tooling & quality](#10-tooling--quality)
 
 ---
 

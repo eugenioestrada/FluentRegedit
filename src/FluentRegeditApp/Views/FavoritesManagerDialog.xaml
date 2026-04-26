@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="FluentRegeditApp.Views.FavoritesManagerDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Manage favorites"
+    CloseButtonText="Close">
+    <Grid Width="560" Height="420" RowSpacing="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ListView Grid.Row="0" x:Name="ItemsList" SelectionMode="Single">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Padding="0,4">
+                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding SubPath}" Opacity="0.75" TextWrapping="Wrap" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+            <Button Content="Rename" Click="OnRename" />
+            <Button Content="Delete" Click="OnDelete" />
+            <Button Content="Move up" Click="OnMoveUp" />
+            <Button Content="Move down" Click="OnMoveDown" />
+        </StackPanel>
+    </Grid>
+</ContentDialog>

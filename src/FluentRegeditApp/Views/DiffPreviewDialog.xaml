@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="FluentRegeditApp.Views.DiffPreviewDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Import preview"
+    PrimaryButtonText="Import"
+    CloseButtonText="Cancel"
+    DefaultButton="Primary">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Width="640" Height="460">
+        <StackPanel Spacing="10">
+            <Expander x:Name="AddExpander" IsExpanded="True" HorizontalAlignment="Stretch">
+                <Expander.Header>
+                    <TextBlock x:Name="AddHeader" Text="Additions" />
+                </Expander.Header>
+                <ItemsControl x:Name="AddList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,4">
+                                <TextBlock Text="{Binding DisplayHeader}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding DisplayDetail}" Opacity="0.85" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Expander>
+
+            <Expander x:Name="ModExpander" IsExpanded="True" HorizontalAlignment="Stretch">
+                <Expander.Header>
+                    <TextBlock x:Name="ModHeader" Text="Modifications" />
+                </Expander.Header>
+                <ItemsControl x:Name="ModList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,4">
+                                <TextBlock Text="{Binding DisplayHeader}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding DisplayDetail}" Opacity="0.85" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Expander>
+
+            <Expander x:Name="DelExpander" IsExpanded="True" HorizontalAlignment="Stretch">
+                <Expander.Header>
+                    <TextBlock x:Name="DelHeader" Text="Deletions" />
+                </Expander.Header>
+                <ItemsControl x:Name="DelList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,4">
+                                <TextBlock Text="{Binding DisplayHeader}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding DisplayDetail}" Opacity="0.85" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Expander>
+
+            <TextBlock x:Name="EmptyText" Text="No differences detected." Opacity="0.7" Visibility="Collapsed" />
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>

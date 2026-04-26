@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="FluentRegeditApp.Views.ValueEditorDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Edit value"
+    PrimaryButtonText="OK"
+    CloseButtonText="Cancel"
+    DefaultButton="Primary">
+
+    <StackPanel Spacing="10" Width="520">
+        <TextBlock x:Name="NameLabel" Opacity="0.8" />
+        <TextBox x:Name="NameBox" Header="Value name" />
+        <ComboBox x:Name="KindCombo" Header="Type" SelectionChanged="OnKindChanged">
+            <x:String>REG_SZ</x:String>
+            <x:String>REG_EXPAND_SZ</x:String>
+            <x:String>REG_MULTI_SZ</x:String>
+            <x:String>REG_DWORD</x:String>
+            <x:String>REG_QWORD</x:String>
+            <x:String>REG_BINARY</x:String>
+            <x:String>REG_NONE</x:String>
+        </ComboBox>
+
+        <StackPanel x:Name="TextPanel" Spacing="4">
+            <TextBox x:Name="TextBoxData" Header="Value data" AcceptsReturn="True"
+                     TextWrapping="Wrap" Height="160" />
+        </StackPanel>
+
+        <StackPanel x:Name="NumberPanel" Spacing="6" Visibility="Collapsed">
+            <TextBox x:Name="NumberBox" Header="Value data" />
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <RadioButton x:Name="HexRadio" Content="Hexadecimal" IsChecked="True" Checked="OnBaseChanged" />
+                <RadioButton x:Name="DecRadio" Content="Decimal" Checked="OnBaseChanged" />
+            </StackPanel>
+        </StackPanel>
+
+        <TextBlock x:Name="ErrorText" Foreground="OrangeRed" Visibility="Collapsed" />
+    </StackPanel>
+</ContentDialog>

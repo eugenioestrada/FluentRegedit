@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="FluentRegeditApp.Views.SettingsDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Settings"
+    PrimaryButtonText="Save"
+    CloseButtonText="Cancel"
+    DefaultButton="Primary">
+    <StackPanel Spacing="14" Width="460">
+        <ComboBox x:Name="ThemeCombo" Header="Theme">
+            <x:String>System</x:String>
+            <x:String>Light</x:String>
+            <x:String>Dark</x:String>
+        </ComboBox>
+
+        <StackPanel Spacing="4">
+            <TextBlock Text="Registry view" />
+            <StackPanel Orientation="Horizontal" Spacing="14">
+                <RadioButton x:Name="ViewDefault" Content="Default" GroupName="RegView" />
+                <RadioButton x:Name="View32" Content="32-bit" GroupName="RegView" />
+                <RadioButton x:Name="View64" Content="64-bit" GroupName="RegView" />
+            </StackPanel>
+        </StackPanel>
+
+        <ToggleSwitch x:Name="ConfirmDestructiveToggle" Header="Confirm destructive operations" />
+        <ToggleSwitch x:Name="RegexSearchToggle" Header="Use regex in search" />
+    </StackPanel>
+</ContentDialog>

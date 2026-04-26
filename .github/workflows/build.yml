@@ -1,0 +1,25 @@
+name: build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build solution
+        working-directory: src
+        continue-on-error: true
+        run: dotnet build FluentRegedit.slnx --configuration Release
+
+      - name: Test
+        working-directory: src
+        run: dotnet test FluentRegeditApp.Tests/FluentRegeditApp.Tests.csproj --configuration Release --logger "trx;LogFilePrefix=tests" --logger "console;verbosity=normal"

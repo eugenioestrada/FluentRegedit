@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="FluentRegeditApp.Views.SnapshotManagerDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Snapshots"
+    CloseButtonText="Close">
+    <Grid Width="640" Height="420" RowSpacing="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" x:Name="LocationText" Opacity="0.8" />
+
+        <ListView Grid.Row="1" x:Name="ItemsList" SelectionMode="Single">
+            <ListView.HeaderTemplate>
+                <DataTemplate>
+                    <Grid Padding="8,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="100" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Name" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="1" Text="Created" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="2" Text="Size" FontWeight="SemiBold" />
+                    </Grid>
+                </DataTemplate>
+            </ListView.HeaderTemplate>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="100" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding FileName}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="1" Text="{Binding CreatedDisplay}" />
+                        <TextBlock Grid.Column="2" Text="{Binding SizeDisplay}" />
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
+            <Button x:Name="RestoreBtn" Content="Restore" Click="OnRestore" />
+            <Button x:Name="DeleteBtn" Content="Delete" Click="OnDelete" />
+            <Button x:Name="OpenFolderBtn" Content="Open folder" Click="OnOpenFolder" />
+        </StackPanel>
+
+        <TextBlock Grid.Row="3" x:Name="StatusText" Foreground="OrangeRed" Visibility="Collapsed" TextWrapping="Wrap" />
+    </Grid>
+</ContentDialog>

@@ -26,4 +26,6 @@ public sealed class NavigationHistory<T> where T : class
 
     public T? Back() { if (CanGoBack) { _index--; return Current; } return null; }
     public T? Forward() { if (CanGoForward) { _index++; return Current; } return null; }
+
+    public void Clear() { _entries.Clear(); _index = -1; }
 }

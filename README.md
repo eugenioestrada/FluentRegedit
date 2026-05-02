@@ -10,8 +10,8 @@ A modern, Fluent Design replacement for the Windows Registry Editor (`regedit.ex
 
 ## Tech stack
 
-- **WinUI 3** + **Windows App SDK 1.8**
-- **.NET 8**
+- **WinUI 3** + **Windows App SDK 2.0**
+- **.NET 10**
 - **MVVM** architecture
 - **xUnit v3** + **AwesomeAssertions** for tests
 
@@ -64,8 +64,8 @@ _Screenshots coming soon._
 ## Requirements (development)
 
 - **Windows 10 21H1 (build 19041)** or newer (Windows 11 recommended for Mica).
-- **.NET 8 SDK** (the project currently builds with the .NET 10 preview SDK installed on the dev machine; .NET 8 is the target framework).
-- **Windows App SDK 1.8** runtime (restored automatically via NuGet).
+- **.NET 10 SDK** (the project currently builds with the .NET 10 preview SDK installed on the dev machine; .NET 10 is the target framework).
+- **Windows App SDK 2.0** runtime (restored automatically via NuGet).
 - **Visual Studio 2022 17.10+** with the *Windows App SDK C# Templates* component, **or** the command-line `dotnet` CLI.
 
 ## Build

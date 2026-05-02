@@ -14,9 +14,9 @@ Before filing, search existing issues and the [roadmap](./roadmap.md) to avoid d
 ## Prerequisites
 
 - **Windows 10 build 19041 (21H1)** or newer (Windows 11 recommended).
-- **.NET 8 SDK**.
+- **.NET 10 SDK**.
 - **Visual Studio 2022 17.10+** with the *Windows App SDK C# Templates* component, **or** the `dotnet` CLI.
-- Windows App SDK 1.8 runtime (restored automatically via NuGet).
+- Windows App SDK 2.0 runtime (restored automatically via NuGet).
 
 ## Build & test
 
@@ -35,7 +35,7 @@ dotnet test src
 
 ## Coding conventions
 
-- Target framework is **.NET 8**, nullable reference types are **enabled** — keep them on and fix warnings rather than suppressing them.
+- Target framework is **.NET 10**, nullable reference types are **enabled** — keep them on and fix warnings rather than suppressing them.
 - Follow the existing **MVVM** layout: `Models/`, `Services/`, `ViewModels/`, `Views/`, `Controls/`.
 - Keep registry I/O in `Services/`; never call `Microsoft.Win32.Registry` directly from views or view-models.
 - Run `dotnet format` before sending a PR if it's available in your toolchain.

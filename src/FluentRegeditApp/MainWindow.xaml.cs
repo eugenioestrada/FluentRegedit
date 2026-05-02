@@ -141,6 +141,7 @@ namespace FluentRegeditApp
             };
             ViewModel.Registry.View = rv;
             _edit.View = rv;
+            _importer.View = rv;
 
             // View menu toggle states
             ViewDefaultItem.IsChecked = _settings.View == RegView.Default;
@@ -513,6 +514,34 @@ namespace FluentRegeditApp
             }
         }
 
+        private async void OnExportValueClick(object sender, RoutedEventArgs e)
+        {
+            var current = _history.Current ?? ViewModel.Roots[0];
+            if (ValuesList.SelectedItem is not RegistryValueItem item)
+            {
+                await ShowMessageAsync("Export value", "Select a value to export.");
+                return;
+            }
+
+            var picker = new FileSavePicker { SuggestedStartLocation = PickerLocationId.Desktop };
+            picker.FileTypeChoices.Add("Registration entries", new List<string> { ".reg" });
+            picker.SuggestedFileName = SuggestedValueExportName(current, item);
+            InitializeWithWindow(picker);
+
+            var file = await picker.PickSaveFileAsync();
+            if (file is null) return;
+
+            try
+            {
+                await Task.Run(() => _exporter.ExportValue(current.Root, current.SubPath, item.Name, file.Path));
+                ShowToast("Value exported", $"{item.DisplayName}  →  {file.Path}", InfoBarSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                await ShowMessageAsync("Export value failed", ex.Message);
+            }
+        }
+
         private async void OnExportJsonClick(object sender, RoutedEventArgs e) =>
             await ExportFlatAsync("JSON", new List<string> { ".json" }, "application/json", _jsonCsv.ExportJson);
 
@@ -547,6 +576,68 @@ namespace FluentRegeditApp
             var file = await picker.PickSingleFileAsync();
             if (file is null) return;
             await PreviewThenImportAsync(file.Path);
+        }
+
+        private async void OnImportValueClick(object sender, RoutedEventArgs e)
+        {
+            var picker = new FileOpenPicker { SuggestedStartLocation = PickerLocationId.Desktop };
+            picker.FileTypeFilter.Add(".reg");
+            InitializeWithWindow(picker);
+
+            var file = await picker.PickSingleFileAsync();
+            if (file is null) return;
+            await PreviewThenImportSingleValueAsync(file.Path);
+        }
+
+        private async Task PreviewThenImportSingleValueAsync(string path)
+        {
+            var current = _history.Current ?? ViewModel.Roots[0];
+            RegFileEntry.SetValue value;
+            try
+            {
+                var entries = await Task.Run(() => _importer.Parse(path).ToList());
+                var values = entries.OfType<RegFileEntry.SetValue>().ToList();
+                var unsupported = entries.Any(e => e is RegFileEntry.DeleteKey or RegFileEntry.DeleteValue);
+                if (unsupported || values.Count != 1)
+                {
+                    var reason = unsupported
+                        ? "The file contains delete entries. Choose a .reg file with exactly one value assignment."
+                        : $"The file must contain exactly one value assignment; it contains {values.Count}.";
+                    await ShowMessageAsync("Cannot import single value", reason);
+                    return;
+                }
+                value = values[0];
+            }
+            catch (Exception ex)
+            {
+                await ShowMessageAsync("Cannot read .reg", ex.Message);
+                return;
+            }
+
+            var sourcePath = PathParser.Combine(value.Root, value.SubPath);
+            var valueDisplayName = string.IsNullOrEmpty(value.Name) ? "(Default)" : value.Name;
+            var confirm = new ContentDialog
+            {
+                Title = "Import single value",
+                Content = $"Import '{valueDisplayName}' from\n{sourcePath}\n\ninto\n{current.FullPath}?",
+                PrimaryButtonText = "Import",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = Content.XamlRoot,
+            };
+            if (await confirm.ShowAsync() != ContentDialogResult.Primary) return;
+
+            RegImportResult result;
+            try { result = await Task.Run(() => _importer.ImportSingleValue(path, current.Root, current.SubPath)); }
+            catch (Exception ex) { await ShowMessageAsync("Import value failed", ex.Message); return; }
+
+            await ViewModel.LoadValuesAsync(current);
+            UpdateStatus(current);
+
+            if (result.Errors.Count > 0)
+                await ShowMessageAsync("Import value failed", string.Join("\n", result.Errors.Take(20)));
+            else
+                ShowToast("Value imported", $"{valueDisplayName} → {current.FullPath}", InfoBarSeverity.Success);
         }
 
         private async Task PreviewThenImportAsync(string path)
@@ -772,7 +863,9 @@ namespace FluentRegeditApp
             yield return new("Backup current key", null, () => OnBackupClick(this, new RoutedEventArgs()));
             yield return new("Manage backups…", null, () => OnManageBackupsClick(this, new RoutedEventArgs()));
             yield return new("Import .reg…", null, () => OnImportClick(this, new RoutedEventArgs()));
+            yield return new("Import single value into current key…", null, () => OnImportValueClick(this, new RoutedEventArgs()));
             yield return new("Export current key as .reg…", null, () => OnExportClick(this, new RoutedEventArgs()));
+            yield return new("Export selected value as .reg…", null, () => OnExportValueClick(this, new RoutedEventArgs()));
             yield return new("Export current key as .json…", null, () => OnExportJsonClick(this, new RoutedEventArgs()));
             yield return new("Export current key as .csv…", null, () => OnExportCsvClick(this, new RoutedEventArgs()));
             yield return new("Add to favorites…", null, () => OnAddFavoriteClick(this, new RoutedEventArgs()));
@@ -912,6 +1005,15 @@ namespace FluentRegeditApp
             var name = node.IsRoot ? node.Root.ShortName() : node.Name;
             var safe = new System.Text.StringBuilder(name.Length);
             foreach (var c in name)
+                safe.Append(char.IsLetterOrDigit(c) || c == '-' || c == '_' ? c : '_');
+            return $"{safe}.reg";
+        }
+
+        private static string SuggestedValueExportName(RegistryKeyNode node, RegistryValueItem item)
+        {
+            var name = item.IsDefault ? "Default" : item.Name;
+            var safe = new System.Text.StringBuilder(node.Name.Length + name.Length + 1);
+            foreach (var c in $"{node.Name}_{name}")
                 safe.Append(char.IsLetterOrDigit(c) || c == '-' || c == '_' ? c : '_');
             return $"{safe}.reg";
         }

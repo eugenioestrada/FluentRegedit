@@ -87,6 +87,7 @@
                                     <FontIcon Glyph="&#xE8E5;" FontFamily="Segoe Fluent Icons" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Import single value into current key…" Click="OnImportValueClick" />
                             <MenuFlyoutSubItem Text="Export current key">
                                 <MenuFlyoutItem Text="As .reg (Unicode v5)…" Click="OnExportClick">
                                     <MenuFlyoutItem.Icon>
@@ -333,6 +334,9 @@
                                     <FontIcon Glyph="&#xE74D;" FontFamily="Segoe Fluent Icons" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
+                            <MenuFlyoutSeparator />
+                            <MenuFlyoutItem Text="Import value into current key…" Click="OnImportValueClick" />
+                            <MenuFlyoutItem Text="Export selected value…" Click="OnExportValueClick" />
                             <MenuFlyoutSeparator />
                             <MenuFlyoutItem Text="Copy value name" Click="OnCopyValueNameClick" />
                         </MenuFlyout>

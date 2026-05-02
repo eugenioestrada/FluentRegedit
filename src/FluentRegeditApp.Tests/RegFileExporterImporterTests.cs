@@ -115,4 +115,94 @@ public class RegFileExporterImporterTests
             if (File.Exists(regPath)) File.Delete(regPath);
         }
     }
+
+    [Fact]
+    public void ExportValue_writes_only_the_selected_value()
+    {
+        using var sandbox = new SandboxFixture();
+        using (var key = sandbox.Open())
+        {
+            key.SetValue("Keep", "selected", RegistryValueKind.String);
+            key.SetValue("Other", "not exported", RegistryValueKind.String);
+            using var child = key.CreateSubKey("Child", writable: true)!;
+            child.SetValue("Inner", 1, RegistryValueKind.DWord);
+        }
+
+        var regPath = Path.Combine(Path.GetTempPath(), $"flreg-value-{Guid.NewGuid():N}.reg");
+        try
+        {
+            var svc = new RegistryService();
+            new RegFileExporter(svc).ExportValue(RegistryRoot.CurrentUser, sandbox.SubPath, "Keep", regPath);
+
+            var text = File.ReadAllText(regPath, Encoding.Unicode);
+            text.Should().Contain($"[HKEY_CURRENT_USER\\{sandbox.SubPath}]");
+            text.Should().Contain("\"Keep\"=\"selected\"");
+            text.Should().NotContain("Other");
+            text.Should().NotContain("Child");
+        }
+        finally
+        {
+            if (File.Exists(regPath)) File.Delete(regPath);
+        }
+    }
+
+    [Fact]
+    public void ImportSingleValue_writes_one_value_to_target_key()
+    {
+        using var source = new SandboxFixture();
+        using var target = new SandboxFixture();
+        using (var key = source.Open())
+        {
+            key.SetValue("Only", 123, RegistryValueKind.DWord);
+            key.SetValue("IgnoredByExport", "ignored", RegistryValueKind.String);
+        }
+
+        var regPath = Path.Combine(Path.GetTempPath(), $"flreg-single-import-{Guid.NewGuid():N}.reg");
+        try
+        {
+            var svc = new RegistryService();
+            new RegFileExporter(svc).ExportValue(RegistryRoot.CurrentUser, source.SubPath, "Only", regPath);
+
+            var result = new RegFileImporter().ImportSingleValue(regPath, RegistryRoot.CurrentUser, target.SubPath);
+
+            result.Errors.Should().BeEmpty();
+            result.ValuesWritten.Should().Be(1);
+            using var restored = target.Open(writable: false);
+            restored.GetValue("Only").Should().Be(123);
+            restored.GetValueKind("Only").Should().Be(RegistryValueKind.DWord);
+            restored.GetValue("IgnoredByExport").Should().BeNull();
+        }
+        finally
+        {
+            if (File.Exists(regPath)) File.Delete(regPath);
+        }
+    }
+
+    [Fact]
+    public void ImportSingleValue_rejects_multiple_values()
+    {
+        using var sandbox = new SandboxFixture();
+        var regPath = Path.Combine(Path.GetTempPath(), $"flreg-multi-import-{Guid.NewGuid():N}.reg");
+        try
+        {
+            var sb = new StringBuilder();
+            sb.Append("Windows Registry Editor Version 5.00\r\n\r\n");
+            sb.Append($"[HKEY_CURRENT_USER\\{sandbox.SubPath}]\r\n");
+            sb.Append("\"One\"=\"1\"\r\n");
+            sb.Append("\"Two\"=\"2\"\r\n\r\n");
+            File.WriteAllText(regPath, sb.ToString(), new UnicodeEncoding(false, true));
+
+            var result = new RegFileImporter().ImportSingleValue(regPath, RegistryRoot.CurrentUser, sandbox.SubPath);
+
+            result.Errors.Should().ContainSingle(e => e.Contains("Expected exactly one value entry"));
+            result.ValuesWritten.Should().Be(0);
+            using var key = sandbox.Open(writable: false);
+            key.GetValue("One").Should().BeNull();
+            key.GetValue("Two").Should().BeNull();
+        }
+        finally
+        {
+            if (File.Exists(regPath)) File.Delete(regPath);
+        }
+    }
 }

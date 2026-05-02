@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Microsoft.Win32;
 using FluentRegeditApp.Models;
@@ -34,6 +35,8 @@ public abstract record RegFileEntry
 
 public sealed class RegFileImporter
 {
+    public RegistryView View { get; set; } = RegistryView.Default;
+
     public IEnumerable<RegFileEntry> Parse(string filePath)
     {
         var text = File.ReadAllText(filePath, DetectEncoding(filePath));
@@ -182,7 +185,7 @@ public sealed class RegFileImporter
                     {
                         try
                         {
-                            using var baseKey = RegistryKey.OpenBaseKey(currentRoot.ToHive(), RegistryView.Default);
+                            using var baseKey = RegistryKey.OpenBaseKey(currentRoot.ToHive(), View);
                             baseKey.DeleteSubKeyTree(currentSub, throwOnMissingSubKey: false);
                             result.KeysDeleted++;
                         }
@@ -192,9 +195,9 @@ public sealed class RegFileImporter
                     {
                         try
                         {
-                            using var baseKey = RegistryKey.OpenBaseKey(currentRoot.ToHive(), RegistryView.Default);
+                            using var baseKey = RegistryKey.OpenBaseKey(currentRoot.ToHive(), View);
                             currentKey = string.IsNullOrEmpty(currentSub)
-                                ? RegistryKey.OpenBaseKey(currentRoot.ToHive(), RegistryView.Default)
+                                ? RegistryKey.OpenBaseKey(currentRoot.ToHive(), View)
                                 : baseKey.CreateSubKey(currentSub, writable: true);
                             result.KeysCreated++;
                         }
@@ -237,6 +240,59 @@ public sealed class RegFileImporter
         finally
         {
             currentKey?.Dispose();
+        }
+
+        return result;
+    }
+
+    public RegImportResult ImportSingleValue(string filePath, RegistryRoot targetRoot, string targetSubPath)
+    {
+        var result = new RegImportResult();
+        List<RegFileEntry.SetValue> values;
+        try
+        {
+            var entries = Parse(filePath).ToList();
+            values = entries.OfType<RegFileEntry.SetValue>().ToList();
+            var unsupported = entries.Any(e => e is RegFileEntry.DeleteKey or RegFileEntry.DeleteValue);
+            if (unsupported)
+                result.Errors.Add("Single-value import does not support delete entries.");
+            if (values.Count != 1)
+                result.Errors.Add($"Expected exactly one value entry, found {values.Count}.");
+            if (result.Errors.Count > 0)
+                return result;
+        }
+        catch (Exception ex)
+        {
+            result.Errors.Add($"Parse failed: {ex.Message}");
+            return result;
+        }
+
+        var value = values[0];
+        if (value.Data is null)
+        {
+            result.Errors.Add($"Value '{value.Name}' has no data.");
+            return result;
+        }
+
+        try
+        {
+            using var baseKey = RegistryKey.OpenBaseKey(targetRoot.ToHive(), View);
+            using var openedSubKey = string.IsNullOrEmpty(targetSubPath)
+                ? null
+                : baseKey.OpenSubKey(targetSubPath, writable: true);
+            var targetKey = string.IsNullOrEmpty(targetSubPath) ? baseKey : openedSubKey;
+            if (targetKey is null)
+            {
+                result.Errors.Add("Target key not accessible.");
+                return result;
+            }
+
+            targetKey.SetValue(value.Name, value.Data, value.Kind);
+            result.ValuesWritten = 1;
+        }
+        catch (Exception ex)
+        {
+            result.Errors.Add($"Write value '{value.Name}': {ex.Message}");
         }
 
         return result;

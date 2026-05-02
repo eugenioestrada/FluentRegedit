@@ -29,6 +29,30 @@ public sealed class RegFileExporter
         WriteKey(writer, root, subPath);
     }
 
+    public void ExportValue(RegistryRoot root, string subPath, string valueName, string filePath)
+    {
+        using var key = _registry.OpenKey(root, subPath);
+        if (key is null)
+            throw new InvalidOperationException("Key not accessible.");
+
+        var names = key.GetValueNames();
+        if (!Array.Exists(names, n => string.Equals(n, valueName, StringComparison.Ordinal)))
+            throw new InvalidOperationException("Value does not exist.");
+
+        var kind = key.GetValueKind(valueName);
+        var raw = key.GetValue(valueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+
+        using var stream = File.Create(filePath);
+        using var writer = new StreamWriter(stream, new UnicodeEncoding(bigEndian: false, byteOrderMark: true))
+        { NewLine = "\r\n" };
+
+        writer.WriteLine("Windows Registry Editor Version 5.00");
+        writer.WriteLine();
+        writer.WriteLine($"[{(string.IsNullOrEmpty(subPath) ? root.FullName() : root.FullName() + "\\" + subPath)}]");
+        writer.WriteLine(FormatValueLine(valueName, kind, raw));
+        writer.WriteLine();
+    }
+
     private void WriteKey(StreamWriter writer, RegistryRoot root, string subPath)
     {
         using var key = _registry.OpenKey(root, subPath);

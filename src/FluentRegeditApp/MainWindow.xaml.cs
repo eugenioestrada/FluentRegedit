@@ -399,6 +399,16 @@ namespace FluentRegeditApp
             await NavigateToAsync(node, recordHistory: true);
         }
 
+        private async void OnRegistryShortcutClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuFlyoutItem item || item.Tag is not string path)
+            {
+                return;
+            }
+
+            await NavigateToPathAsync(path);
+        }
+
         // ---- Search ----
 
         private async void OnSearchClick(object sender, RoutedEventArgs e) => await ShowSearchAsync();

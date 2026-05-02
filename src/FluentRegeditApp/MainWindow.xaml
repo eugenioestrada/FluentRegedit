@@ -153,40 +153,161 @@
                         <MenuBarItem Title="Shortcuts">
                             <MenuFlyoutSubItem Text="Startup">
                                 <MenuFlyoutItem Text="Current user Run" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\Run" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Current user RunOnce" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutItem Text="Local machine Run" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\Run" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Local machine RunOnce" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutSeparator />
                                 <MenuFlyoutItem Text="Current user StartupApproved" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutItem Text="Local machine StartupApproved" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Current user Winlogon" Tag="HKCU\Software\Microsoft\Windows NT\CurrentVersion\Winlogon" Click="OnRegistryShortcutClick" />
                             </MenuFlyoutSubItem>
                             <MenuFlyoutSubItem Text="Apps and shell">
                                 <MenuFlyoutItem Text="Installed apps" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Installed apps for current user" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutItem Text="Installed 32-bit apps" Tag="HKLM\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutItem Text="App Paths" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Current user App Paths" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutSeparator />
                                 <MenuFlyoutItem Text="File associations" Tag="HKCR" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutItem Text="All file types shell menu" Tag="HKCR\*\shell" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Directory shell menu" Tag="HKCR\Directory\shell" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Drive shell menu" Tag="HKCR\Drive\shell" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutItem Text="Applications classes" Tag="HKCR\Applications" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutItem Text="CLSID classes" Tag="HKCR\CLSID" Click="OnRegistryShortcutClick" />
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSubItem Text="COM, protocols and file types">
+                                <MenuFlyoutItem Text="ProgID classes" Tag="HKCR\.txt" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Interface classes" Tag="HKCR\Interface" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="TypeLib classes" Tag="HKCR\TypeLib" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="WOW6432Node CLSID" Tag="HKLM\Software\Classes\WOW6432Node\CLSID" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem Text="URL protocol handlers" Tag="HKCR\PROTOCOLS\Handler" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="URL protocol filters" Tag="HKCR\PROTOCOLS\Filter" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="MIME database" Tag="HKCR\MIME\Database\Content Type" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Registered applications" Tag="HKLM\Software\RegisteredApplications" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Start menu internet clients" Tag="HKLM\Software\Clients\StartMenuInternet" Click="OnRegistryShortcutClick" />
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSubItem Text="Explorer and desktop">
+                                <MenuFlyoutItem Text="Explorer advanced settings" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Explorer user settings" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Explorer system settings" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\Explorer" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Desktop settings" Tag="HKCU\Control Panel\Desktop" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Personalization" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Taskbar settings" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Taskband pinned items" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Tray notify icons" Tag="HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\TrayNotify" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Mouse settings" Tag="HKCU\Control Panel\Mouse" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Keyboard settings" Tag="HKCU\Control Panel\Keyboard" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem Text="Shell extensions approved" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Explorer namespace" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Desktop namespace" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace" Click="OnRegistryShortcutClick" />
                             </MenuFlyoutSubItem>
                             <MenuFlyoutSubItem Text="System">
                                 <MenuFlyoutItem Text="Services" Tag="HKLM\SYSTEM\CurrentControlSet\Services" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutItem Text="Device class drivers" Tag="HKLM\SYSTEM\CurrentControlSet\Control\Class" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Session Manager" Tag="HKLM\SYSTEM\CurrentControlSet\Control\Session Manager" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Boot configuration mirror" Tag="HKLM\BCD00000000" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Control hives" Tag="HKLM\SYSTEM\CurrentControlSet\Control" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Computer name" Tag="HKLM\SYSTEM\CurrentControlSet\Control\ComputerName" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Power settings" Tag="HKLM\SYSTEM\CurrentControlSet\Control\Power" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Crash control" Tag="HKLM\SYSTEM\CurrentControlSet\Control\CrashControl" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="SafeBoot" Tag="HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Mounted devices" Tag="HKLM\SYSTEM\MountedDevices" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutItem Text="Winlogon" Tag="HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon" Click="OnRegistryShortcutClick" />
-                                <MenuFlyoutItem Text="Windows Defender" Tag="HKLM\Software\Microsoft\Windows Defender" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutItem Text="Event logs" Tag="HKLM\SYSTEM\CurrentControlSet\Services\EventLog" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Windows NT CurrentVersion" Tag="HKLM\Software\Microsoft\Windows NT\CurrentVersion" Click="OnRegistryShortcutClick" />
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSubItem Text="Hardware and drivers">
+                                <MenuFlyoutItem Text="Hardware enum" Tag="HKLM\SYSTEM\CurrentControlSet\Enum" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="PCI devices" Tag="HKLM\SYSTEM\CurrentControlSet\Enum\PCI" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="USB devices" Tag="HKLM\SYSTEM\CurrentControlSet\Enum\USB" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="HID devices" Tag="HKLM\SYSTEM\CurrentControlSet\Enum\HID" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="SWD devices" Tag="HKLM\SYSTEM\CurrentControlSet\Enum\SWD" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem Text="Driver database" Tag="HKLM\SYSTEM\DriverDatabase" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Driver searching" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\DriverSearching" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Device metadata" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\Device Metadata" Click="OnRegistryShortcutClick" />
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSubItem Text="Security and updates">
+                                <MenuFlyoutItem Text="Windows Defender" Tag="HKLM\Software\Microsoft\Windows Defender" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Windows Update" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\WindowsUpdate" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Windows Update policies" Tag="HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Windows Error Reporting" Tag="HKLM\Software\Microsoft\Windows\Windows Error Reporting" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Reliability analysis" Tag="HKLM\Software\Microsoft\Reliability Analysis" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Software policies for current user" Tag="HKCU\Software\Policies" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Software policies for machine" Tag="HKLM\Software\Policies" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="UAC system policies" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Firewall policy" Tag="HKLM\SYSTEM\CurrentControlSet\Services\SharedAccess\Parameters\FirewallPolicy" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Lsa security packages" Tag="HKLM\SYSTEM\CurrentControlSet\Control\Lsa" Click="OnRegistryShortcutClick" />
                             </MenuFlyoutSubItem>
                             <MenuFlyoutSubItem Text="User and policy">
                                 <MenuFlyoutItem Text="Current user environment" Tag="HKCU\Environment" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutItem Text="Machine environment" Tag="HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutItem Text="User shell folders" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Shell folders" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="International settings" Tag="HKCU\Control Panel\International" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Accessibility" Tag="HKCU\Control Panel\Accessibility" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Colors" Tag="HKCU\Control Panel\Colors" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Cursors" Tag="HKCU\Control Panel\Cursors" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutSeparator />
                                 <MenuFlyoutItem Text="Current user policies" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\Policies" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutItem Text="Local machine policies" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\Policies" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="PolicyManager current user" Tag="HKCU\Software\Microsoft\PolicyManager" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="PolicyManager device" Tag="HKLM\Software\Microsoft\PolicyManager" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Group Policy state" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\Group Policy" Click="OnRegistryShortcutClick" />
                             </MenuFlyoutSubItem>
                             <MenuFlyoutSubItem Text="Network and devices">
                                 <MenuFlyoutItem Text="TCP/IP interfaces" Tag="HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="TCP/IP parameters" Tag="HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="DNS cache service" Tag="HKLM\SYSTEM\CurrentControlSet\Services\Dnscache" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="DHCP service" Tag="HKLM\SYSTEM\CurrentControlSet\Services\Dhcp" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Lanman workstation" Tag="HKLM\SYSTEM\CurrentControlSet\Services\LanmanWorkstation" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Lanman server" Tag="HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutItem Text="Network control" Tag="HKLM\SYSTEM\CurrentControlSet\Control\Network" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Network profiles" Tag="HKLM\Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Network signatures" Tag="HKLM\Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures" Click="OnRegistryShortcutClick" />
                                 <MenuFlyoutItem Text="Printers" Tag="HKLM\SYSTEM\CurrentControlSet\Control\Print\Printers" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="USB storage" Tag="HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR" Click="OnRegistryShortcutClick" />
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSubItem Text="Accounts and identity">
+                                <MenuFlyoutItem Text="Profile list" Tag="HKLM\Software\Microsoft\Windows NT\CurrentVersion\ProfileList" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Authentication" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\Authentication" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Credential providers" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\Authentication\Credential Providers" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="LogonUI" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="User accounts" Tag="HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\SpecialAccounts\UserList" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="SID users hive" Tag="HKU" Click="OnRegistryShortcutClick" />
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSubItem Text="Windows components">
+                                <MenuFlyoutItem Text="Delivery Optimization" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\DeliveryOptimization" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Cloud Content" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Search" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\Search" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Windows Search service" Tag="HKLM\Software\Microsoft\Windows Search" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Terminal Server client" Tag="HKCU\Software\Microsoft\Terminal Server Client" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Remote Desktop server" Tag="HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Windows Script Host" Tag="HKLM\Software\Microsoft\Windows Script Host" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="PowerShell" Tag="HKLM\Software\Microsoft\PowerShell" Click="OnRegistryShortcutClick" />
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSubItem Text="Microsoft apps">
+                                <MenuFlyoutItem Text="Office current user" Tag="HKCU\Software\Microsoft\Office" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Office machine" Tag="HKLM\Software\Microsoft\Office" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Edge current user" Tag="HKCU\Software\Microsoft\Edge" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Edge machine" Tag="HKLM\Software\Microsoft\Edge" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="OneDrive current user" Tag="HKCU\Software\Microsoft\OneDrive" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Windows Store" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\Store" Click="OnRegistryShortcutClick" />
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSubItem Text="Advanced and less common">
+                                <MenuFlyoutItem Text="Image File Execution Options" Tag="HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Known DLLs" Tag="HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Memory Management" Tag="HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="WMI Autologger" Tag="HKLM\SYSTEM\CurrentControlSet\Control\WMI\Autologger" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Windows Side-by-Side" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\SideBySide" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Tracing" Tag="HKLM\Software\Microsoft\Tracing" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Perflib" Tag="HKLM\Software\Microsoft\Windows NT\CurrentVersion\Perflib" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Time zones" Tag="HKLM\Software\Microsoft\Windows NT\CurrentVersion\Time Zones" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Fonts" Tag="HKLM\Software\Microsoft\Windows NT\CurrentVersion\Fonts" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Known package families" Tag="HKLM\Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications" Click="OnRegistryShortcutClick" />
+                                <MenuFlyoutItem Text="Capability access manager" Tag="HKCU\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore" Click="OnRegistryShortcutClick" />
                             </MenuFlyoutSubItem>
                         </MenuBarItem>
                         <MenuBarItem Title="View">

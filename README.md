@@ -59,7 +59,13 @@ The Windows registry is still a critical surface for power users, IT pros and de
 
 ## Screenshots
 
-_Screenshots coming soon._
+### Light mode
+
+![FluentRegedit light mode](./images/screenshot1.png)
+
+### Dark mode
+
+![FluentRegedit dark mode](./images/screenshot2.png)
 
 ## Requirements (development)
 

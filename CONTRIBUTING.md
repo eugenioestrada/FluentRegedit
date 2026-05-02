@@ -15,7 +15,7 @@ Before filing, search existing issues and the [roadmap](./roadmap.md) to avoid d
 
 - **Windows 10 build 19041 (21H1)** or newer (Windows 11 recommended).
 - **.NET 10 SDK**.
-- **Visual Studio 2022 17.10+** with the *Windows App SDK C# Templates* component, **or** the `dotnet` CLI.
+- **Visual Studio 2026 +** with the *Windows App SDK C# Templates* component, **or** the `dotnet` CLI.
 - Windows App SDK 2.0 runtime (restored automatically via NuGet).
 
 ## Build & test

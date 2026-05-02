@@ -72,7 +72,7 @@ The Windows registry is still a critical surface for power users, IT pros and de
 - **Windows 10 21H1 (build 19041)** or newer (Windows 11 recommended for Mica).
 - **.NET 10 SDK** (the project currently builds with the .NET 10 preview SDK installed on the dev machine; .NET 10 is the target framework).
 - **Windows App SDK 2.0** runtime (restored automatically via NuGet).
-- **Visual Studio 2022 17.10+** with the *Windows App SDK C# Templates* component, **or** the command-line `dotnet` CLI.
+- **Visual Studio 2026 +** with the *Windows App SDK C# Templates* component, **or** the command-line `dotnet` CLI.
 
 ## Build
 

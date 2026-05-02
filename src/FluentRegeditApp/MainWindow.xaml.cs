@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.Win32;
+using Windows.UI;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -103,10 +104,38 @@ namespace FluentRegeditApp
                 _appWindow.TitleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
                 _appWindow.TitleBar.ButtonInactiveBackgroundColor = Microsoft.UI.Colors.Transparent;
                 _appWindow.TitleBar.IconShowOptions = Microsoft.UI.Windowing.IconShowOptions.HideIconAndSystemMenu;
+                ApplyTitleBarButtonColors();
             }
 
             UpdateTitleBarInsets();
         }
+
+        private void ApplyTitleBarButtonColors()
+        {
+            if (_appWindow is null || _appWindow.TitleBar is null ||
+                !Microsoft.UI.Windowing.AppWindowTitleBar.IsCustomizationSupported())
+            {
+                return;
+            }
+
+            var isDark = Content is FrameworkElement fe && fe.ActualTheme == ElementTheme.Dark;
+            var foreground = isDark ? Microsoft.UI.Colors.White : Microsoft.UI.Colors.Black;
+            var inactiveForeground = isDark ? Color.FromArgb(160, 255, 255, 255) : Color.FromArgb(160, 0, 0, 0);
+            var hoverBackground = isDark ? Color.FromArgb(32, 255, 255, 255) : Color.FromArgb(24, 0, 0, 0);
+            var pressedBackground = isDark ? Color.FromArgb(48, 255, 255, 255) : Color.FromArgb(40, 0, 0, 0);
+
+            var titleBar = _appWindow.TitleBar;
+            titleBar.ButtonForegroundColor = foreground;
+            titleBar.ButtonHoverForegroundColor = foreground;
+            titleBar.ButtonPressedForegroundColor = foreground;
+            titleBar.ButtonInactiveForegroundColor = inactiveForeground;
+            titleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
+            titleBar.ButtonInactiveBackgroundColor = Microsoft.UI.Colors.Transparent;
+            titleBar.ButtonHoverBackgroundColor = hoverBackground;
+            titleBar.ButtonPressedBackgroundColor = pressedBackground;
+        }
+
+        private void OnRootThemeChanged(FrameworkElement sender, object args) => ApplyTitleBarButtonColors();
 
         private void UpdateTitleBarInsets()
         {
@@ -124,12 +153,15 @@ namespace FluentRegeditApp
             // Theme
             if (Content is FrameworkElement fe)
             {
+                fe.ActualThemeChanged -= OnRootThemeChanged;
                 fe.RequestedTheme = _settings.Theme switch
                 {
                     AppTheme.Light => ElementTheme.Light,
                     AppTheme.Dark => ElementTheme.Dark,
                     _ => ElementTheme.Default,
                 };
+                fe.ActualThemeChanged += OnRootThemeChanged;
+                ApplyTitleBarButtonColors();
             }
 
             // Registry view

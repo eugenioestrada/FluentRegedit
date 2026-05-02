@@ -438,11 +438,8 @@ namespace FluentRegeditApp
         private async Task ShowSearchAsync()
         {
             var current = _history.Current ?? ViewModel.Roots[0];
-            var dlg = new SearchDialog(_search, current.Root, current.SubPath,
-                prefilledQuery: _lastQuery, defaultRegex: _settings.RegexSearch || _lastUseRegex)
-            {
-                XamlRoot = Content.XamlRoot,
-            };
+            var dlg = PrepareDialog(new SearchDialog(_search, current.Root, current.SubPath,
+                prefilledQuery: _lastQuery, defaultRegex: _settings.RegexSearch || _lastUseRegex));
             var result = await dlg.ShowAsync();
 
             // Capture results for Find Next regardless of outcome
@@ -648,15 +645,14 @@ namespace FluentRegeditApp
 
             var sourcePath = PathParser.Combine(value.Root, value.SubPath);
             var valueDisplayName = string.IsNullOrEmpty(value.Name) ? "(Default)" : value.Name;
-            var confirm = new ContentDialog
+            var confirm = PrepareDialog(new ContentDialog
             {
                 Title = "Import single value",
                 Content = $"Import '{valueDisplayName}' from\n{sourcePath}\n\ninto\n{current.FullPath}?",
                 PrimaryButtonText = "Import",
                 CloseButtonText = "Cancel",
                 DefaultButton = ContentDialogButton.Primary,
-                XamlRoot = Content.XamlRoot,
-            };
+            });
             if (await confirm.ShowAsync() != ContentDialogResult.Primary) return;
 
             RegImportResult result;
@@ -682,7 +678,7 @@ namespace FluentRegeditApp
                 return;
             }
 
-            var preview = new DiffPreviewDialog(diff!) { XamlRoot = Content.XamlRoot };
+            var preview = PrepareDialog(new DiffPreviewDialog(diff!));
             preview.PrimaryButtonText = "Import";
             preview.CloseButtonText = "Cancel";
             preview.DefaultButton = ContentDialogButton.Primary;
@@ -728,7 +724,7 @@ namespace FluentRegeditApp
 
         private async void OnManageBackupsClick(object sender, RoutedEventArgs e)
         {
-            var dlg = new SnapshotManagerDialog(_snapshots) { XamlRoot = Content.XamlRoot };
+            var dlg = PrepareDialog(new SnapshotManagerDialog(_snapshots));
             await dlg.ShowAsync();
             if (dlg.Result is not null)
             {
@@ -789,7 +785,7 @@ namespace FluentRegeditApp
             var file = await picker.PickSingleFileAsync();
             if (file is null) return;
 
-            var nameInput = new RenameDialog("Load hive — pick mount key name", "MyLoadedHive") { XamlRoot = Content.XamlRoot };
+            var nameInput = PrepareDialog(new RenameDialog("Load hive — pick mount key name", "MyLoadedHive"));
             if (await nameInput.ShowAsync() != ContentDialogResult.Primary) return;
             try
             {
@@ -809,15 +805,14 @@ namespace FluentRegeditApp
                 await ShowMessageAsync("Unload hive", "Select a mounted top-level key under HKU first (e.g. HKU\\MyLoadedHive).");
                 return;
             }
-            var confirm = new ContentDialog
+            var confirm = PrepareDialog(new ContentDialog
             {
                 Title = "Unload hive",
                 Content = $"Unload HKU\\{current.SubPath}? Any process holding handles to it may misbehave.",
                 PrimaryButtonText = "Unload",
                 CloseButtonText = "Cancel",
                 DefaultButton = ContentDialogButton.Close,
-                XamlRoot = Content.XamlRoot,
-            };
+            });
             if (await confirm.ShowAsync() != ContentDialogResult.Primary) return;
             try
             {
@@ -850,11 +845,10 @@ namespace FluentRegeditApp
 
         private async void OnSettingsClick(object sender, RoutedEventArgs e)
         {
-            var dlg = new SettingsDialog(_settings)
+            var dlg = PrepareDialog(new SettingsDialog(_settings)
             {
-                XamlRoot = Content.XamlRoot,
                 OwnerHwnd = WinRT.Interop.WindowNative.GetWindowHandle(this),
-            };
+            });
             if (await dlg.ShowAsync() != ContentDialogResult.Primary) return;
             var oldView = _settings.View;
             var oldSnapDir = _settings.SnapshotDirectory;
@@ -874,7 +868,7 @@ namespace FluentRegeditApp
         private async Task ShowCommandPaletteAsync()
         {
             var commands = BuildPaletteCommands();
-            var dlg = new CommandPaletteDialog(commands) { XamlRoot = Content.XamlRoot };
+            var dlg = PrepareDialog(new CommandPaletteDialog(commands));
             await dlg.ShowAsync();
         }
 
@@ -977,7 +971,7 @@ namespace FluentRegeditApp
             var current = _history.Current;
             if (current is null) return;
             var defaultName = current.IsRoot ? current.Root.ShortName() : current.Name;
-            var dlg = new RenameDialog("Add favorite", defaultName) { XamlRoot = Content.XamlRoot };
+            var dlg = PrepareDialog(new RenameDialog("Add favorite", defaultName));
             if (await dlg.ShowAsync() != ContentDialogResult.Primary) return;
             _favorites.Add(new Favorite { Name = dlg.NewName, Root = current.Root, SubPath = current.SubPath });
             RefreshFavoritesMenu();
@@ -986,7 +980,7 @@ namespace FluentRegeditApp
 
         private async void OnManageFavoritesClick(object sender, RoutedEventArgs e)
         {
-            var dlg = new FavoritesManagerDialog(_favorites) { XamlRoot = Content.XamlRoot };
+            var dlg = PrepareDialog(new FavoritesManagerDialog(_favorites));
             await dlg.ShowAsync();
             RefreshFavoritesMenu();
         }
@@ -1056,15 +1050,21 @@ namespace FluentRegeditApp
             WinRT.Interop.InitializeWithWindow.Initialize(target, hwnd);
         }
 
+        private T PrepareDialog<T>(T dialog) where T : ContentDialog
+        {
+            dialog.XamlRoot = Content.XamlRoot;
+            dialog.RequestedTheme = Content is FrameworkElement fe ? fe.ActualTheme : ElementTheme.Default;
+            return dialog;
+        }
+
         private async Task ShowMessageAsync(string title, string message)
         {
-            var dlg = new ContentDialog
+            var dlg = PrepareDialog(new ContentDialog
             {
                 Title = title,
                 Content = new ScrollViewer { Content = new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap }, MaxHeight = 360 },
                 CloseButtonText = "OK",
-                XamlRoot = Content.XamlRoot,
-            };
+            });
             await dlg.ShowAsync();
         }
 
@@ -1083,7 +1083,7 @@ namespace FluentRegeditApp
             var current = _history.Current;
             if (current is null) return;
 
-            var dlg = new RenameDialog("New subkey", "NewKey") { XamlRoot = Content.XamlRoot };
+            var dlg = PrepareDialog(new RenameDialog("New subkey", "NewKey"));
             if (await dlg.ShowAsync() != ContentDialogResult.Primary) return;
             var name = dlg.NewName;
             try
@@ -1113,15 +1113,14 @@ namespace FluentRegeditApp
 
             if (_settings.ConfirmDestructive)
             {
-                var confirm = new ContentDialog
+                var confirm = PrepareDialog(new ContentDialog
                 {
                     Title = "Delete key",
                     Content = $"Permanently delete this key and all its subkeys?\n\n{current.FullPath}\n\nA snapshot will be saved to the backups folder first.",
                     PrimaryButtonText = "Delete",
                     CloseButtonText = "Cancel",
                     DefaultButton = ContentDialogButton.Close,
-                    XamlRoot = Content.XamlRoot,
-                };
+                });
                 if (await confirm.ShowAsync() != ContentDialogResult.Primary) return;
             }
 
@@ -1167,7 +1166,7 @@ namespace FluentRegeditApp
                 await ShowMessageAsync("Rename", "Select a non-root subkey to rename.");
                 return;
             }
-            var dlg = new RenameDialog("Rename key", current.Name) { XamlRoot = Content.XamlRoot };
+            var dlg = PrepareDialog(new RenameDialog("Rename key", current.Name));
             if (await dlg.ShowAsync() != ContentDialogResult.Primary) return;
             try
             {
@@ -1200,7 +1199,7 @@ namespace FluentRegeditApp
                 await ShowMessageAsync("Rename value", "Select a non-default value to rename.");
                 return;
             }
-            var dlg = new RenameDialog("Rename value", item.Name) { XamlRoot = Content.XamlRoot };
+            var dlg = PrepareDialog(new RenameDialog("Rename value", item.Name));
             if (await dlg.ShowAsync() != ContentDialogResult.Primary) return;
             try
             {
@@ -1229,7 +1228,7 @@ namespace FluentRegeditApp
             if (current is null) return;
 
             var dlg = ValueEditorDialog.ForCreate();
-            dlg.XamlRoot = Content.XamlRoot;
+            PrepareDialog(dlg);
             if (await dlg.ShowAsync() != ContentDialogResult.Primary) return;
 
             try
@@ -1261,7 +1260,7 @@ namespace FluentRegeditApp
             }
 
             var dlg = ValueEditorDialog.ForEdit(item);
-            dlg.XamlRoot = Content.XamlRoot;
+            PrepareDialog(dlg);
             if (await dlg.ShowAsync() != ContentDialogResult.Primary) return;
 
             try
@@ -1286,15 +1285,14 @@ namespace FluentRegeditApp
 
             if (_settings.ConfirmDestructive)
             {
-                var confirm = new ContentDialog
+                var confirm = PrepareDialog(new ContentDialog
                 {
                     Title = "Delete value",
                     Content = $"Delete the value '{item.DisplayName}' from\n{current.FullPath}?",
                     PrimaryButtonText = "Delete",
                     CloseButtonText = "Cancel",
                     DefaultButton = ContentDialogButton.Close,
-                    XamlRoot = Content.XamlRoot,
-                };
+                });
                 if (await confirm.ShowAsync() != ContentDialogResult.Primary) return;
             }
 

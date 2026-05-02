@@ -36,15 +36,14 @@ public sealed partial class SnapshotManagerDialog : ContentDialog
             ShowStatus("Select a snapshot to restore.");
             return;
         }
-        var confirm = new ContentDialog
+        var confirm = PrepareDialog(new ContentDialog
         {
             Title = "Restore snapshot",
             Content = $"Import '{sel.FileName}'? This will overwrite affected registry values.",
             PrimaryButtonText = "Restore",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
-            XamlRoot = this.XamlRoot,
-        };
+        });
         var r = await confirm.ShowAsync();
         if (r != ContentDialogResult.Primary) return;
 
@@ -64,15 +63,14 @@ public sealed partial class SnapshotManagerDialog : ContentDialog
             ShowStatus("Select a snapshot to delete.");
             return;
         }
-        var confirm = new ContentDialog
+        var confirm = PrepareDialog(new ContentDialog
         {
             Title = "Delete snapshot",
             Content = $"Permanently delete '{sel.FileName}'?",
             PrimaryButtonText = "Delete",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Close,
-            XamlRoot = this.XamlRoot,
-        };
+        });
         var r = await confirm.ShowAsync();
         if (r != ContentDialogResult.Primary) return;
 
@@ -105,4 +103,11 @@ public sealed partial class SnapshotManagerDialog : ContentDialog
     }
 
     private void HideStatus() => StatusText.Visibility = Visibility.Collapsed;
+
+    private T PrepareDialog<T>(T dialog) where T : ContentDialog
+    {
+        dialog.XamlRoot = XamlRoot;
+        dialog.RequestedTheme = ActualTheme;
+        return dialog;
+    }
 }

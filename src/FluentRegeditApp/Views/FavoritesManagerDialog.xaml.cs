@@ -23,7 +23,7 @@ public sealed partial class FavoritesManagerDialog : ContentDialog
     {
         var sel = Selected;
         if (sel is null) return;
-        var dlg = new RenameDialog("Rename favorite", sel.Name) { XamlRoot = this.XamlRoot };
+        var dlg = PrepareDialog(new RenameDialog("Rename favorite", sel.Name));
         var result = await dlg.ShowAsync();
         if (result == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(dlg.NewName))
         {
@@ -36,15 +36,14 @@ public sealed partial class FavoritesManagerDialog : ContentDialog
     {
         var sel = Selected;
         if (sel is null) return;
-        var confirm = new ContentDialog
+        var confirm = PrepareDialog(new ContentDialog
         {
             Title = "Delete favorite",
             Content = $"Remove '{sel.Name}'?",
             PrimaryButtonText = "Delete",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Close,
-            XamlRoot = this.XamlRoot,
-        };
+        });
         var r = await confirm.ShowAsync();
         if (r == ContentDialogResult.Primary)
             _service.Remove(sel.Name);
@@ -64,5 +63,12 @@ public sealed partial class FavoritesManagerDialog : ContentDialog
         if (idx < 0 || idx >= _service.Items.Count - 1) return;
         _service.Move(idx, idx + 1);
         ItemsList.SelectedIndex = idx + 1;
+    }
+
+    private T PrepareDialog<T>(T dialog) where T : ContentDialog
+    {
+        dialog.XamlRoot = XamlRoot;
+        dialog.RequestedTheme = ActualTheme;
+        return dialog;
     }
 }
